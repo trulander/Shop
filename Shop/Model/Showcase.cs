@@ -19,9 +19,9 @@ namespace Shop.Model
             _productShowcases = new List<ProductShowcase>();
         }
 
-        public override IValidateResult Validate()
+        public override IResult Validate()
         {
-            IValidateResult result = new ValidateResult(true);
+            IResult result = new Result(true, string.Empty);
 
             if (string.IsNullOrWhiteSpace(Name))
             {
@@ -38,12 +38,12 @@ namespace Shop.Model
             return result;
         }
 
-        public IValidateResult ProductPlace(Product product, int quantity, decimal cost)
+        public IResult ProductPlace(Product product, int quantity, decimal cost)
         {
-            IValidateResult result = new ValidateResult(false);
+            IResult result = new Result(false, string.Empty);
             ProductShowcase ps = new ProductShowcase(Id, product.Id, quantity, cost);
 
-            IValidateResult validateResult = ps.Validate();
+            IResult validateResult = ps.Validate();
 
             if (validateResult.Success)
             {

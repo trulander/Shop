@@ -1,8 +1,8 @@
 ﻿namespace Shop.Model
 {
-    public interface IEntity
+    interface IEntity
     {
-        public int Id { get; set; }
-        public IValidateResult Validate();
+        int Id { get; set; }
+        IResult Validate();
     }
 }

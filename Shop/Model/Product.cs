@@ -10,9 +10,9 @@
             return $"[{Id}] {Name} (cap: {Capacity})";
         }
 
-        public override IValidateResult Validate()
+        public override IResult Validate()
         {
-            IValidateResult result = new ValidateResult(true);
+            IResult result = new Result(true, string.Empty);
 
             if (string.IsNullOrWhiteSpace(Name))
             {

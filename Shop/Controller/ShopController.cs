@@ -153,9 +153,9 @@ namespace Shop.Controller
         /// Вызывает сценарий создания товара
         /// </summary>
         /// <returns></returns>
-        IActionResult ProductCreateAction()
+        IResult ProductCreateAction()
         {
-            IActionResult result = new ActionResult(false, string.Empty);
+            IResult result = new Result(false, string.Empty);
             Output.WriteLine("\r\nДобавить товар:", ConsoleColor.Yellow);
             Product p = new Product();
             Output.Write("Наименование:");
@@ -165,7 +165,7 @@ namespace Shop.Controller
             if (int.TryParse(Console.ReadLine(), out int capacity))
                 p.Capacity = capacity;
 
-            IValidateResult validateResult = p.Validate();
+            IResult validateResult = p.Validate();
 
             if (validateResult.Success)
             {
@@ -181,11 +181,11 @@ namespace Shop.Controller
         /// Вызывает сценарий изменения товара
         /// </summary>
         /// <returns></returns>
-        IActionResult ProductUpdateAction()
+        IResult ProductUpdateAction()
         {
             PrintProductsAction(false);
 
-            IActionResult result = new ActionResult(false, "");
+            IResult result = new Result(false, "");
 
             Output.Write("\r\nВведите id товара: ", ConsoleColor.Yellow);
             if (int.TryParse(Console.ReadLine(), out int pid))
@@ -209,7 +209,7 @@ namespace Shop.Controller
                             product.Capacity = capacityInt;
                     }
 
-                    IValidateResult validateResult = product.Validate();
+                    IResult validateResult = product.Validate();
 
                     if (validateResult.Success)
                     {
@@ -229,9 +229,9 @@ namespace Shop.Controller
         /// Вызывает сценарий удаления товара
         /// </summary>
         /// <returns></returns>
-        IActionResult ProductRemoveAction()
+        IResult ProductRemoveAction()
         {
-            IActionResult result = new ActionResult(false, "");
+            IResult result = new Result(false, "");
 
             PrintProductsAction(false);
 
@@ -262,9 +262,9 @@ namespace Shop.Controller
         /// Вызывает сценарий обновления витрины
         /// </summary>
         /// <returns></returns>
-        IActionResult ShowcaseCreateAction()
+        IResult ShowcaseCreateAction()
         {
-            IActionResult result = new ActionResult(false, "");
+            IResult result = new Result(false, "");
             Console.Clear();
             Output.WriteLine("Добавить витрину", ConsoleColor.Yellow);
             Showcase showcase = new Showcase();
@@ -275,7 +275,7 @@ namespace Shop.Controller
             if (int.TryParse(Console.ReadLine(), out int maxCapacity))
                 showcase.MaxCapacity = maxCapacity;
 
-            IValidateResult validateResult = showcase.Validate();
+            IResult validateResult = showcase.Validate();
 
             if (validateResult.Success)
             {
@@ -293,9 +293,9 @@ namespace Shop.Controller
         /// Вызывает сценарий обновления витрины
         /// </summary>
         /// <returns></returns>
-        IActionResult ShowcaseUpdateAction()
+        IResult ShowcaseUpdateAction()
         {
-            IActionResult result = new ActionResult(false, string.Empty);
+            IResult result = new Result(false, string.Empty);
 
             PrintShowcasesAction(false);
 
@@ -326,7 +326,7 @@ namespace Shop.Controller
                     
                     if (Showcases[idx].GetProductsCapacity(ProductRepository.All()) <= showcase.MaxCapacity)
                     {
-                        IValidateResult validateResult = showcase.Validate();
+                        IResult validateResult = showcase.Validate();
 
                         if (validateResult.Success)
                         {
@@ -349,17 +349,17 @@ namespace Shop.Controller
         /// Вызывает сценарий удаления витрины
         /// </summary>
         /// <returns></returns>
-        IActionResult ShowcaseRemoveAction()
+        IResult ShowcaseRemoveAction()
         {
             Console.Clear();
             Output.WriteLine("Удалить витрину", ConsoleColor.Cyan);
 
             if (ShowcasesCount() == 0)
-                return new ActionResult(false, "Нет витрин для удаления");
+                return new Result(false, "Нет витрин для удаления");
 
             PrintShowcasesAction(false);
 
-            IActionResult result = new ActionResult(false,"");
+            IResult result = new Result(false,"");
 
             Output.Write("\r\nВведите Id витрины для удаления: ", ConsoleColor.Yellow);
             if (int.TryParse(Console.ReadLine(), out int id) && id > 0)
@@ -387,14 +387,14 @@ namespace Shop.Controller
         /// Вызывает сценарий размещения товара на витрине
         /// </summary>
         /// <returns></returns>
-        IActionResult PlaceProductAction()
+        IResult PlaceProductAction()
         {
             Console.Clear();
 
             if (ShowcasesCount() == 0 || ProductRepository.Count() == 0)
-                return new ActionResult(false, "Нет товара и витрин для отображения");
+                return new Result(false, "Нет товара и витрин для отображения");
 
-            IActionResult result = new ActionResult(false, "");
+            IResult result = new Result(false, "");
 
             Output.Write("Размещение товара на витрине", ConsoleColor.Yellow);
 
@@ -426,7 +426,7 @@ namespace Shop.Controller
                                 Output.Write("Введите стоимость: ");
                                 if (int.TryParse(Console.ReadLine(), out int cost) && cost > 0)
                                 {
-                                    IValidateResult validateResult = Showcases[scIdx].ProductPlace(product, quantity, cost);
+                                    IResult validateResult = Showcases[scIdx].ProductPlace(product, quantity, cost);
                                     if (validateResult.Success)
                                         result.Success = true;
                                     else
@@ -601,7 +601,7 @@ namespace Shop.Controller
         /// Выводит на экран сообщение о результате выполнения действия
         /// </summary>
         /// <param name="result"></param>
-        void ShowResult(IActionResult result)
+        void ShowResult(IResult result)
         {
             if (result.Success && string.IsNullOrWhiteSpace(result.Message))
                 result.Message = "Выполнено";

@@ -1,16 +1,16 @@
 ﻿namespace Shop.Model
 {
-    class ActionResult: IActionResult
+    class Result: IResult
     {
         public bool Success { get; set; } = false;
         public string Message { get; set; } = "";
 
-        public ActionResult()
+        public Result()
         {
             
         }
 
-        public ActionResult(bool success, string message)
+        public Result(bool success, string message)
         {
             Success = success;
             Message = message;
