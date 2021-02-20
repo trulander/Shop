@@ -542,7 +542,7 @@ namespace Shop.Controller
             foreach (Showcase showcase in Showcases)
             {
                 if ((showOnlyDeleted && showcase.RemovedAt != null) || (!showOnlyDeleted && showcase.RemovedAt == null))
-                    Output.WriteLine(showcase.Print());
+                    Output.WriteLine(showcase.ToString());
             }                
 
             if (waitPressKey)

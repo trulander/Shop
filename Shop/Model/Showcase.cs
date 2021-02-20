@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Shop.Model
 {
-    class Showcase : Entity, IPrinted
+    class Showcase : Entity
     {
         public string Name { get; set; }
         public int MaxCapacity { get; set; }
@@ -95,7 +95,7 @@ namespace Shop.Model
             }
         }
 
-        public string Print()
+        public override string ToString()
         {
             return $"[{Id}] {Name} (max: {MaxCapacity}) от " + CreatedAt.ToShortDateString() + ((RemovedAt != null) ? "(удалено " + RemovedAt?.ToShortDateString() + ")" : "");
         }
