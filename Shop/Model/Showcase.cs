@@ -100,23 +100,17 @@ namespace Shop.Model
             return $"[{Id}] {Name} (max: {MaxCapacity}) от " + CreatedAt.ToShortDateString() + ((RemovedAt != null) ? "(удалено " + RemovedAt?.ToShortDateString() + ")" : "");
         }
 
-        internal int GetProductsCapacity(List<Product> products)
+        internal int GetProductsCapacity(IEnumerable<Product> products)
         {
-            List<int> pids = GetProductsIds();
-
             int capacity = 0;
 
             for (int i = 0; i < _productShowcases.Count; i++)
-            {
-                for (int j = 0; j < products.Count; j++)
-                {
-                    if (_productShowcases[i].ShowcaseId == Id && _productShowcases[i].ProductId.Equals(products[j].Id))
+                foreach (Product product in products)
+                    if (_productShowcases[i].ShowcaseId == Id && _productShowcases[i].ProductId.Equals(product.Id))
                     {
-                        capacity += products[j].Capacity * _productShowcases[i].Quantity;
+                        capacity += product.Capacity * _productShowcases[i].Quantity;
                         break;
                     }
-                }
-            }
 
             return capacity;
         }

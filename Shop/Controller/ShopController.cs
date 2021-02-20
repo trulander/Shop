@@ -8,8 +8,7 @@ namespace Shop.Controller
     {
         public bool IsLoggedIn { get; private set; }
 
-        public List<Product> Products { get; set; }
-        int _lastInsertedProductId = 0;
+        private IProductRepository ProductRepository { get; set; }
 
         public List<Showcase> Showcases { get; set; }
         int _lastInsertedShowcaseId = 0;
@@ -47,7 +46,11 @@ namespace Shop.Controller
 
             CurrentMenu = Menu;
 
-            Products = new List<Product>();
+
+            ProductRepository = new ProductRepository();
+            ProductRepository.Seed(2);
+
+            //Products = new List<Product>();
             Showcases = new List<Showcase>();
 
             Seed();
@@ -58,19 +61,8 @@ namespace Shop.Controller
         /// </summary>
         /// <param name="products">Заполнять товары</param>
         /// <param name="showcases">Заполнять витрины</param>
-        void Seed(bool products = true, bool showcases = true)
+        void Seed(bool showcases = true)
         {
-            if (products)
-                for (int i = 0; i < 4; i++)
-                {
-                    Products.Add(new Product()
-                    {
-                        Id = ++_lastInsertedProductId,
-                        Name = "Товар " + (i + 1),
-                        Capacity = 1 + i
-                    });
-                }
-
             if (showcases)
                 for (int i = 0; i < 4; i++)
                 {
@@ -177,8 +169,7 @@ namespace Shop.Controller
 
             if (validateResult.Success)
             {
-                p.Id = ++_lastInsertedProductId;
-                Products.Add(p);
+                ProductRepository.Add(p);
                 result.Success = true;
             }
             else result.Message = validateResult.Message;
@@ -199,38 +190,30 @@ namespace Shop.Controller
             Output.Write("\r\nВведите id товара: ", ConsoleColor.Yellow);
             if (int.TryParse(Console.ReadLine(), out int pid))
             {
-                int pIdx = IndexOfProduct(pid);
+                Product product = ProductRepository.GetById(pid);
 
-                if (pIdx >= 0)
+                if (product != null)
                 {
-                    Product product = new Product();
-
-                    Output.Write("Наименование (" + Products[pIdx].Name + "):");
+                    Output.Write("Наименование (" + product.Name + "):");
                     string name = Console.ReadLine();
 
                     if (!string.IsNullOrWhiteSpace(name))
                         product.Name = name;
-                    else
-                        product.Name = Products[pIdx].Name;
 
                     //Не даем возможность менять объем товара размещенного на витрине
                     if (!ProductPlacedInShowcase(product.Id))
                     {
-                        Output.Write("Занимаемый объем (" + Products[pIdx].Capacity + "):");
+                        Output.Write("Занимаемый объем (" + product.Capacity + "):");
 
-                        string capacity = Console.ReadLine();
-                        if (int.TryParse(capacity, out int capacityInt))
+                        if (int.TryParse(Console.ReadLine(), out int capacityInt))
                             product.Capacity = capacityInt;
-                        else
-                            product.Capacity = Products[pIdx].Capacity;
                     }
 
                     IValidateResult validateResult = product.Validate();
 
                     if (validateResult.Success)
                     {
-                        product.Id = pid;
-                        Products[pIdx] = product;
+                        ProductRepository.Update(product);
                         result.Success = true;
                     }
                     else result.Message = validateResult.Message;
@@ -255,15 +238,17 @@ namespace Shop.Controller
             Output.Write("\r\nВведите Id товара: ", ConsoleColor.Yellow);
             if (int.TryParse(Console.ReadLine(), out int id) && id > 0)
             {
-                int idx = IndexOfProduct(id);
-                if (idx >= 0)
+                Product product = ProductRepository.GetById(id);
+
+                if (product != null)
                 {
                     for (int i = 0; i < Showcases.Count; i++)
                     {
                         if (Showcases[i].HasProduct(id))
                             Showcases[i].ProductRemove(id);
                     }
-                    Products.RemoveAt(idx);
+
+                    ProductRepository.Remove(id);
                     result.Success = true;
                 }
                 else result.Message = "Товар с идентификатором " + id + " не найден";
@@ -338,7 +323,8 @@ namespace Shop.Controller
                         showcase.MaxCapacity = Showcases[idx].MaxCapacity;
 
                     //Чекаем изменение объема в меньшую сторону
-                    if (Showcases[idx].GetProductsCapacity(Products) <= showcase.MaxCapacity)
+                    
+                    if (Showcases[idx].GetProductsCapacity(ProductRepository.All()) <= showcase.MaxCapacity)
                     {
                         IValidateResult validateResult = showcase.Validate();
 
@@ -405,7 +391,7 @@ namespace Shop.Controller
         {
             Console.Clear();
 
-            if (ShowcasesCount() == 0 || Products.Count == 0)
+            if (ShowcasesCount() == 0 || ProductRepository.Count() == 0)
                 return new ActionResult(false, "Нет товара и витрин для отображения");
 
             IActionResult result = new ActionResult(false, "");
@@ -427,12 +413,12 @@ namespace Shop.Controller
                     Output.Write("\r\nВведите Id товара: ");
                     if (int.TryParse(Console.ReadLine(), out int pId) && pId > 0)
                     {
-                        int pIdx = IndexOfProduct(pId);
+                        Product product = ProductRepository.GetById(pId);
 
-                        if (pIdx >= 0)
+                        if (product != null)
                         {
                             Output.Write("Выбран товар ");
-                            Output.WriteLine(Products[pIdx].Name, ConsoleColor.Cyan);
+                            Output.WriteLine(product.Name, ConsoleColor.Cyan);
 
                             Output.Write("Введите количество: ");
                             if (int.TryParse(Console.ReadLine(), out int quantity) && quantity > 0)
@@ -440,7 +426,7 @@ namespace Shop.Controller
                                 Output.Write("Введите стоимость: ");
                                 if (int.TryParse(Console.ReadLine(), out int cost) && cost > 0)
                                 {
-                                    IValidateResult validateResult = Showcases[scIdx].ProductPlace(Products[pIdx], quantity, cost);
+                                    IValidateResult validateResult = Showcases[scIdx].ProductPlace(product, quantity, cost);
                                     if (validateResult.Success)
                                         result.Success = true;
                                     else
@@ -469,7 +455,7 @@ namespace Shop.Controller
         {
             Console.Clear();
 
-            if (Products.Count == 0)
+            if (ProductRepository.Count() == 0)
             {
                 Output.WriteLine("Нет товаров для отображения");
                 Console.ReadKey();
@@ -477,8 +463,8 @@ namespace Shop.Controller
             }
 
             Output.WriteLine("Доступные товары", ConsoleColor.Cyan);            
-            foreach (Product product in Products)
-                Output.WriteLine(product.Print());
+            foreach (Product product in ProductRepository.All())
+                Output.WriteLine(product.ToString());
 
             if (waitPressKey)
                 Console.ReadKey();
@@ -490,7 +476,7 @@ namespace Shop.Controller
         /// <returns></returns>
         void PrintShowcaseProductsAction(bool waitPressKey = true)
         {
-            if (ShowcasesCount() == 0 || Products.Count == 0)
+            if (ShowcasesCount() == 0 || ProductRepository.Count() == 0)
             {
                 Console.Clear();
                 Output.WriteLine("Нет товаров и витрин для отображения");
@@ -517,9 +503,10 @@ namespace Shop.Controller
                     {
                         foreach (int pId in ids)
                         {
-                            int pIdx = IndexOfProduct(pId);
-                            if (pIdx >= 0)
-                                Output.WriteLine(Products[pIdx].Print());
+                            Product product = ProductRepository.GetById(pId);
+
+                            if (product != null)
+                                Output.WriteLine(product.ToString());
                         }
                     }
                     else Output.WriteLine("Нет товаров для отображения");
@@ -563,23 +550,6 @@ namespace Shop.Controller
         }
 
         #endregion
-
-        /// <summary>
-        /// Возвращает индекс товара по id в списке товаров
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        int IndexOfProduct(int id)
-        {
-            int result = -1;
-            for (int i = 0; i < Products.Count; i++)
-                if (Products[i].Id.Equals(id))
-                {
-                    result = i;
-                    break;
-                }
-            return result;
-        }
 
         /// <summary>
         /// Возвращает индекс витрины по id в списке витрин

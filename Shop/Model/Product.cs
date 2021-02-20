@@ -1,11 +1,11 @@
 ﻿namespace Shop.Model
 {
-    class Product: Entity, IPrinted
+    class Product: Entity
     {
         public string Name { get; set; }
         public int Capacity { get; set; }
 
-        public string Print()
+        public override string ToString()
         {
             return $"[{Id}] {Name} (cap: {Capacity})";
         }
