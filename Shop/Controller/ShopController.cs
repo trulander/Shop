@@ -121,12 +121,11 @@ namespace Shop.Controller
 
             IResult validateResult = p.Validate();
 
-            if (validateResult.Success)
-            {
-                ProductRepository.Add(p);
-                result.Success = true;
-            }
-            else result.Message = validateResult.Message;
+            if (!validateResult.Success)
+                return validateResult;
+
+            ProductRepository.Add(p);
+            result.Success = true;
 
             return result;
         }
@@ -146,43 +145,41 @@ namespace Shop.Controller
             {
                 Product product = ProductRepository.GetById(pid);
 
-                if (product != null)
+                if (product == null)
+                    return new Result() { Message = "Товар с идентификатором " + pid + " не найден" };
+
+                Output.Write("Наименование (" + product.Name + "):");
+                string name = Console.ReadLine();
+
+                if (!string.IsNullOrWhiteSpace(name))
+                    product.Name = name;
+
+                //Не даем возможность менять объем товара размещенного на витрине
+
+                bool placedInShowcase = false;
+
+                foreach (Showcase showcase in ShowcaseRepository.All())
+                    if (ShowcaseRepository.GetShowcaseProductsIds(showcase).Count > 0)
+                    {
+                        placedInShowcase = true;
+                        break;
+                    }
+
+                if (!placedInShowcase)
                 {
-                    Output.Write("Наименование (" + product.Name + "):");
-                    string name = Console.ReadLine();
+                    Output.Write("Занимаемый объем (" + product.Capacity + "):");
 
-                    if (!string.IsNullOrWhiteSpace(name))
-                        product.Name = name;
-
-                    //Не даем возможность менять объем товара размещенного на витрине
-
-                    bool placedInShowcase = false;
-
-                    foreach (Showcase showcase in ShowcaseRepository.All())
-                        if (ShowcaseRepository.GetShowcaseProductsIds(showcase).Count > 0)
-                        {
-                            placedInShowcase = true;
-                            break;
-                        }
-
-                    if (!placedInShowcase)
-                    {
-                        Output.Write("Занимаемый объем (" + product.Capacity + "):");
-
-                        if (int.TryParse(Console.ReadLine(), out int capacityInt))
-                            product.Capacity = capacityInt;
-                    }
-
-                    IResult validateResult = product.Validate();
-
-                    if (validateResult.Success)
-                    {
-                        ProductRepository.Update(product);
-                        result.Success = true;
-                    }
-                    else result.Message = validateResult.Message;
+                    if (int.TryParse(Console.ReadLine(), out int capacityInt))
+                        product.Capacity = capacityInt;
                 }
-                else result.Message = "Товар с идентификатором " + pid + " не найден";
+
+                IResult validateResult = product.Validate();
+
+                if (!validateResult.Success)
+                    return validateResult;
+
+                ProductRepository.Update(product);
+                result.Success = true;
             }
             else result.Message = "Идентификатор должен быть целым положительным числом";
 
@@ -204,13 +201,12 @@ namespace Shop.Controller
             {
                 Product product = ProductRepository.GetById(id);
 
-                if (product != null)
-                {
-                    ShowcaseRepository.TakeOut(product);
-                    ProductRepository.Remove(id);
-                    result.Success = true;
-                }
-                else result.Message = "Товар с идентификатором " + id + " не найден";
+                if (product == null)
+                    return new Result() { Message = "Товар с идентификатором " + id + " не найден" };
+
+                ShowcaseRepository.TakeOut(product);
+                ProductRepository.Remove(id);
+                result.Success = true;
             }
             else result.Message = "Идентификатор должен быть целым положительным числом";
 
@@ -237,7 +233,7 @@ namespace Shop.Controller
             IResult validateResult = showcase.Validate();
 
             if (!validateResult.Success)
-                return new Result() { Message = validateResult.Message };
+                return validateResult;
              
             ShowcaseRepository.Add(showcase);
             result.Success = true;
@@ -286,7 +282,7 @@ namespace Shop.Controller
                     IResult validateResult = showcase.Validate();
 
                     if (!validateResult.Success)
-                        return new Result() { Message = validateResult.Message };
+                        return validateResult;
                 
                     ShowcaseRepository.Update(showcase);
                     result.Success = true;
@@ -379,11 +375,7 @@ namespace Shop.Controller
                         Output.Write("Введите стоимость: ");
                         if (int.TryParse(Console.ReadLine(), out int cost) && cost > 0)
                         {
-                            IResult validateResult = ShowcaseRepository.Place(showcase.Id, product, quantity, cost);
-                            if (validateResult.Success)
-                                result.Success = true;
-                            else
-                                result.Message = validateResult.Message;
+                            return ShowcaseRepository.Place(showcase.Id, product, quantity, cost);
                         }
                         else result.Message = "Стоимость товара должна быть положительным числом";
                     }
