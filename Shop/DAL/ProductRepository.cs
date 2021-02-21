@@ -5,7 +5,7 @@ namespace Shop.DAL
 {
     class ProductRepository : IProductRepository
     {
-        List<Product> _items = new List<Product>();
+        readonly List<Product> _items = new List<Product>();
         int _lastInsertedId = 0;
 
         public int Count() => _items.Count;
@@ -29,13 +29,11 @@ namespace Shop.DAL
         public void Remove(int id)
         {
             for (int i = 0; i < _items.Count; i++)
-            {
                 if (_items[i].Id.Equals(id))
                 {
                     _items.RemoveAt(i);
                     break;
                 }
-            }
         }
 
         public void Update(Product entity)

@@ -262,12 +262,11 @@ namespace Shop.Controller
 
             IResult validateResult = showcase.Validate();
 
-            if (validateResult.Success)
-            {
-                ShowcaseRepository.Add(showcase);
-                result.Success = true;
-            }
-            else result.Message = validateResult.Message;
+            if (!validateResult.Success)
+                return new Result() { Message = validateResult.Message };
+             
+            ShowcaseRepository.Add(showcase);
+            result.Success = true;
 
             return result;
         }
@@ -305,20 +304,18 @@ namespace Shop.Controller
                     List<ProductShowcase> productShowcases = ShowcaseRepository.GetShowcaseProducts(showcase);
                     int showcaseFullness = ProductRepository.ProductsCapacity(productShowcases);
 
-                    if (showcaseFullness <= capacityInt)
-                    {
-                        showcase.MaxCapacity = capacityInt;
+                    if (showcaseFullness > capacityInt)
+                        return new Result() { Message = "Невозможно установить заданный объем, объем размещенного товара превышеает значение" };
 
-                        IResult validateResult = showcase.Validate();
+                    showcase.MaxCapacity = capacityInt;
 
-                        if (validateResult.Success)
-                        {
-                            ShowcaseRepository.Update(showcase);
-                            result.Success = true;
-                        }
-                        else result.Message = validateResult.Message;
-                    }
-                    else result.Message = "Невозможно установить заданный объем, объем размещенного товара превышеает значение";
+                    IResult validateResult = showcase.Validate();
+
+                    if (!validateResult.Success)
+                        return new Result() { Message = validateResult.Message };
+                
+                    ShowcaseRepository.Update(showcase);
+                    result.Success = true;
                 } 
                 else result.Message = "Объем должен быть целым положительным числом";    
             }
@@ -509,13 +506,6 @@ namespace Shop.Controller
                 Output.WriteLine("Витрины в корзине", ConsoleColor.Yellow);
             else
                 Output.WriteLine("Доступные витрины", ConsoleColor.Yellow);
-
-            if (ShowcaseRepository.RemovedCount() == 0)
-            {
-                Output.WriteLine("Нет витрин для отображения");
-                Console.ReadKey();
-                return;
-            }
 
             foreach (Showcase showcase in ShowcaseRepository.All())
             {
