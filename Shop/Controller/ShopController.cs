@@ -58,71 +58,45 @@ namespace Shop.Controller
 
         public void RouteTo(string command)
         {
-            string[] data = command.Split('.');
-            string controller = data[0];
-            string action = data[1];
-
-            switch (controller)
+            switch (command)
             {
-                case "product":
-                    switch(action)
-                    {
-                        case "show":
-                            PrintProductsAction();
-                            break;
-
-                        case "create":
-                            ShowResult(ProductCreateAction());
-                            break;
-
-                        case "edit":
-                            ShowResult(ProductUpdateAction());
-                            break;
-
-                        case "remove":
-                            ShowResult(ProductRemoveAction());
-                            break;
-                    }
+                case "product.show":
+                    PrintProductsAction();
+                    break;
+                case "product.create":
+                    ShowResult(ProductCreateAction());
+                    break;
+                case "product.edit":
+                    ShowResult(ProductUpdateAction());
+                    break;
+                case "product.remove":
+                    ShowResult(ProductRemoveAction());
                     break;
 
-                case "showcase":
-                    switch (action)
-                    {
-                        case "show":
-                            PrintShowcasesAction();
-                            break;
-
-                        case "create":
-                            ShowResult(ShowcaseCreateAction());
-                            break;
-
-                        case "edit":
-                            ShowResult(ShowcaseUpdateAction());
-                            break;
-
-                        case "remove":
-                            ShowResult(ShowcaseRemoveAction());
-                            break;
-
-                        case "place_product":
-                            ShowResult(PlaceProductAction());
-                            break;
-
-                        case "products":
-                            PrintShowcaseProductsAction();
-                            break;
-                        case "trash":
-                            PrintShowcasesAction(showOnlyDeleted: true);
-                            break;
-                    }
+                case "showcase.show":
+                    PrintShowcasesAction();
                     break;
-                case "app":
-                    switch (action)
-                    {
-                        case "exit":
-                            Logout();
-                            break;
-                    }
+                case "showcase.create":
+                    ShowResult(ShowcaseCreateAction());
+                    break;
+                case "showcase.edit":
+                    ShowResult(ShowcaseUpdateAction());
+                    break;
+                case "showcase.remove":
+                    ShowResult(ShowcaseRemoveAction());
+                    break;
+                case "showcase.place_product":
+                    ShowResult(PlaceProductAction());
+                    break;
+                case "showcase.products":
+                    PrintShowcaseProductsAction();
+                    break;
+                case "showcase.trash":
+                    PrintShowcasesAction(showOnlyDeleted: true);
+                    break;
+
+                case "app.exit":
+                     Logout();
                     break;
             }
         }
