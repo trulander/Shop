@@ -2,18 +2,12 @@
 {
     class Result: IResult
     {
-        public bool Success { get; set; } = false;
+        public bool Success { get; set; }
         public string Message { get; set; } = "";
 
-        public Result()
-        {
-            
-        }
-
-        public Result(bool success, string message)
+        public Result(bool success = false)
         {
             Success = success;
-            Message = message;
         }
     }
 }

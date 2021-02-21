@@ -5,14 +5,11 @@
         public string Name { get; set; }
         public int Capacity { get; set; }
 
-        public override string ToString()
-        {
-            return $"[{Id}] {Name} (cap: {Capacity})";
-        }
+        public override string ToString() => $"[{Id}] {Name} (cap: {Capacity})";
 
         public override IResult Validate()
         {
-            IResult result = new Result(true, string.Empty);
+            IResult result = new Result(true);
 
             if (string.IsNullOrWhiteSpace(Name))
             {

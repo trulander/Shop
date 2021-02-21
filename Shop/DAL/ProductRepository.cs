@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Shop.Model;
+using System.Collections.Generic;
 
-namespace Shop.Model
+namespace Shop.DAL
 {
     class ProductRepository : IProductRepository
     {
@@ -62,6 +63,16 @@ namespace Shop.Model
             }
         }
 
-        
+        public int ProductsCapacity(List<ProductShowcase> productsShowcase)
+        {
+            int capacity = 0;
+
+            foreach (ProductShowcase item in productsShowcase)
+                foreach (Product product in _items)
+                    if (product.Id == item.ProductId)
+                        capacity += item.Quantity * product.Capacity;
+
+            return capacity;
+        }
     }
 }
