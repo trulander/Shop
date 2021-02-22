@@ -9,7 +9,7 @@ namespace Shop.Model
         public int MaxCapacity { get; set; }
         public int Capacity { get; private set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime? RemovedAt { get; set; } = null;
+        public DateTime? RemovedAt { get; set; }
 
         public override IResult Validate()
         {
