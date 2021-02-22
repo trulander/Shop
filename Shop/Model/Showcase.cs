@@ -31,6 +31,6 @@ namespace Shop.Model
         }
 
         public override string ToString() 
-            =>$"[{Id}] {Name} (max: {MaxCapacity}) от " + CreatedAt.ToShortDateString() + ((RemovedAt != null) ? "(удалено " + RemovedAt?.ToShortDateString() + ")" : "");
+            =>$"[{Id}] {Name} (cap: {Capacity}/{MaxCapacity}) от " + CreatedAt.ToShortDateString() + ((RemovedAt != null) ? "(удалено " + RemovedAt?.ToShortDateString() + ")" : "");
     }
 }
