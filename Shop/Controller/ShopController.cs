@@ -127,7 +127,6 @@ namespace Shop.Controller
                     product.Name = name;
 
                 //Не даем возможность менять объем товара размещенного на витрине
-
                 bool placedInShowcase = false;
 
                 foreach (Showcase showcase in ShowcaseRepository.All())
@@ -144,6 +143,7 @@ namespace Shop.Controller
                     if (int.TryParse(Console.ReadLine(), out int capacityInt))
                         product.Capacity = capacityInt;
                 }
+                else Output.WriteLine("Нельзя изменить объем товара, размещенного на витрине", ConsoleColor.Yellow);
 
                 IResult validateResult = product.Validate();
 
@@ -405,26 +405,30 @@ namespace Shop.Controller
             {
                 Showcase showcase = ShowcaseRepository.GetById(id);
 
-                if (showcase != null && !showcase.RemovedAt.HasValue)
+                if (showcase == null || showcase.RemovedAt.HasValue)
                 {
-                    Output.Write("\r\nТовары на витрине ");
-                    Output.WriteLine(showcase.Name + ":", ConsoleColor.Cyan);
+                    Output.WriteLine("Нет витрин с указанным идентификатором");
+                    return;
+                }
 
-                    List<int> ids = ShowcaseRepository.GetShowcaseProductsIds(showcase);
+                Output.Write("\r\nТовары на витрине ");
+                Output.WriteLine(showcase.Name + ":", ConsoleColor.Cyan);
 
-                    if (ids.Count > 0)
-                    {
-                        foreach (int pId in ids)
-                        {
-                            Product product = ProductRepository.GetById(pId);
+                List<int> ids = ShowcaseRepository.GetShowcaseProductsIds(showcase);
 
-                            if (product != null)
-                                Output.WriteLine(product.ToString());
-                        }
-                    }
-                    else Output.WriteLine("Нет товаров для отображения");
-                } 
-                else Output.WriteLine("Нет витрин с указанным идентификатором");
+                if (ids.Count == 0)
+                {
+                    Output.WriteLine("Нет товаров для отображения");
+                    return;
+                }
+
+                foreach (int pId in ids)
+                {
+                    Product product = ProductRepository.GetById(pId);
+
+                    if (product != null)
+                        Output.WriteLine(product.ToString());
+                }
             }
             else Output.WriteLine("Нет витрин с указанным идентификатором");
 
