@@ -92,13 +92,13 @@ namespace Shop.DAL
             Showcase showcase = GetById(showcaseId);
 
             if (showcase == null)
-                return new Result() { Message = "Витрина с идентификатором " + showcaseId + " не найдена" };
+                return new Result("Витрина с идентификатором " + showcaseId + " не найдена");
 
             if (GetShowcaseProductsIds(showcase).Count > 0)
-                return new Result() { Message = "Витрина уже содержит товар с указанным идентификатором" };
+                return new Result("Витрина уже содержит товар с указанным идентификатором");
 
             if (showcase.Capacity + (product.Capacity * quantity) > showcase.MaxCapacity)
-                return new Result() { Message = "Объем витрины не позволяет разместить товар" };
+                return new Result("Объем витрины не позволяет разместить товар");
 
             ProductShowcase ps = new ProductShowcase(showcaseId, product.Id, quantity, cost)
             {

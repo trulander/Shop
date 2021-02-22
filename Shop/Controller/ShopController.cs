@@ -113,47 +113,48 @@ namespace Shop.Controller
             IResult result = new Result();
 
             Output.Write("\r\nВведите id товара: ", ConsoleColor.Yellow);
-            if (int.TryParse(Console.ReadLine(), out int pid))
-            {
-                Product product = ProductRepository.GetById(pid);
 
-                if (product == null)
-                    return new Result() { Message = "Товар с идентификатором " + pid + " не найден" };
+            if (!int.TryParse(Console.ReadLine(), out int pid))
+                return new Result("Идентификатор должен быть целым положительным числом");
+            
+            Product product = ProductRepository.GetById(pid);
 
-                Output.Write("Наименование (" + product.Name + "):");
-                string name = Console.ReadLine();
+            if (product == null)
+                return new Result("Товар с идентификатором " + pid + " не найден");
 
-                if (!string.IsNullOrWhiteSpace(name))
-                    product.Name = name;
+            Output.Write("Наименование (" + product.Name + "):");
+            string name = Console.ReadLine();
 
-                //Не даем возможность менять объем товара размещенного на витрине
-                bool placedInShowcase = false;
+            if (!string.IsNullOrWhiteSpace(name))
+                product.Name = name;
 
-                foreach (Showcase showcase in ShowcaseRepository.All())
-                    if (ShowcaseRepository.GetShowcaseProductsIds(showcase).Count > 0)
-                    {
-                        placedInShowcase = true;
-                        break;
-                    }
+            //Не даем возможность менять объем товара размещенного на витрине
+            bool placedInShowcase = false;
 
-                if (!placedInShowcase)
+            foreach (Showcase showcase in ShowcaseRepository.All())
+                if (ShowcaseRepository.GetShowcaseProductsIds(showcase).Count > 0)
                 {
-                    Output.Write("Занимаемый объем (" + product.Capacity + "):");
-
-                    if (int.TryParse(Console.ReadLine(), out int capacityInt))
-                        product.Capacity = capacityInt;
+                    placedInShowcase = true;
+                    break;
                 }
-                else Output.WriteLine("Нельзя изменить объем товара, размещенного на витрине", ConsoleColor.Yellow);
 
-                IResult validateResult = product.Validate();
+            if (!placedInShowcase)
+            {
+                Output.Write("Занимаемый объем (" + product.Capacity + "):");
 
-                if (!validateResult.Success)
-                    return validateResult;
-
-                ProductRepository.Update(product);
-                result.Success = true;
+                if (int.TryParse(Console.ReadLine(), out int capacityInt))
+                    product.Capacity = capacityInt;
             }
-            else result.Message = "Идентификатор должен быть целым положительным числом";
+            else Output.WriteLine("Нельзя изменить объем товара, размещенного на витрине", ConsoleColor.Yellow);
+
+            IResult validateResult = product.Validate();
+
+            if (!validateResult.Success)
+                return validateResult;
+
+            ProductRepository.Update(product);
+            result.Success = true;
+            
 
             return result;
         }
@@ -164,25 +165,21 @@ namespace Shop.Controller
         /// <returns></returns>
         IResult ProductRemoveAction()
         {
-            IResult result = new Result();
-
             PrintProductsAction(false);
 
             Output.Write("\r\nВведите Id товара: ", ConsoleColor.Yellow);
-            if (int.TryParse(Console.ReadLine(), out int id) && id > 0)
-            {
-                Product product = ProductRepository.GetById(id);
+            if (!int.TryParse(Console.ReadLine(), out int id) || id > 0)
+                return new Result("Идентификатор должен быть целым положительным числом");
 
-                if (product == null)
-                    return new Result() { Message = "Товар с идентификатором " + id + " не найден" };
+            Product product = ProductRepository.GetById(id);
 
-                ShowcaseRepository.TakeOut(product);
-                ProductRepository.Remove(id);
-                result.Success = true;
-            }
-            else result.Message = "Идентификатор должен быть целым положительным числом";
+            if (product == null)
+                return new Result("Товар с идентификатором " + id + " не найден");
 
-            return result;
+            ShowcaseRepository.TakeOut(product);
+            ProductRepository.Remove(id);
+
+            return new Result(true);
         }
 
         /// <summary>
@@ -219,51 +216,47 @@ namespace Shop.Controller
         /// <returns></returns>
         IResult ShowcaseUpdateAction()
         {
-            IResult result = new Result();
-
             PrintShowcasesAction(false);
 
             Output.Write("\r\nВведите Id витрины: ", ConsoleColor.Yellow);
-            if (int.TryParse(Console.ReadLine(), out int id))
-            {
-                Showcase showcase = ShowcaseRepository.GetById(id);
 
-                if (showcase == null || showcase.RemovedAt.HasValue)
-                    return new Result() { Message = "Витрина с идентификатором " + id + " не найдена" };
+            if (!int.TryParse(Console.ReadLine(), out int id))
+                return new Result("Идентификатор должен быть целым положительным числом");
+            
+            Showcase showcase = ShowcaseRepository.GetById(id);
 
-                Output.Write("Наименование (" + showcase.Name + "):");
-                string name = Console.ReadLine();
+            if (showcase == null || showcase.RemovedAt.HasValue)
+                return new Result("Витрина с идентификатором " + id + " не найдена");
 
-                if (!string.IsNullOrWhiteSpace(name))
-                    showcase.Name = name;
+            Output.Write("Наименование (" + showcase.Name + "):");
+            string name = Console.ReadLine();
 
-                Output.Write("Максимально допустимый объем витрины (" + showcase.MaxCapacity + "):");
+            if (!string.IsNullOrWhiteSpace(name))
+                showcase.Name = name;
 
-                //Если объем задан корректно, то применяем, в противном случае оставляем как было
-                if (int.TryParse(Console.ReadLine(), out int capacityInt))
-                {
-                    //Чекаем изменение объема в меньшую сторону
-                    List<ProductShowcase> productShowcases = ShowcaseRepository.GetShowcaseProducts(showcase);
-                    int showcaseFullness = ProductRepository.ProductsCapacity(productShowcases);
+            Output.Write("Максимально допустимый объем витрины (" + showcase.MaxCapacity + "):");
 
-                    if (showcaseFullness > capacityInt)
-                        return new Result() { Message = "Невозможно установить заданный объем, объем размещенного товара превышеает значение" };
+            //Если объем задан корректно, то применяем, в противном случае оставляем как было
+            if (!int.TryParse(Console.ReadLine(), out int capacityInt))
+                return new Result("Объем должен быть целым положительным числом");
 
-                    showcase.MaxCapacity = capacityInt;
+            //Чекаем изменение объема в меньшую сторону
+            List<ProductShowcase> productShowcases = ShowcaseRepository.GetShowcaseProducts(showcase);
+            int showcaseFullness = ProductRepository.ProductsCapacity(productShowcases);
 
-                    IResult validateResult = showcase.Validate();
+            if (showcaseFullness > capacityInt)
+                return new Result("Невозможно установить заданный объем, объем размещенного товара превышеает значение");
 
-                    if (!validateResult.Success)
-                        return validateResult;
+            showcase.MaxCapacity = capacityInt;
+
+            IResult validateResult = showcase.Validate();
+
+            if (!validateResult.Success)
+                return validateResult;
                 
-                    ShowcaseRepository.Update(showcase);
-                    result.Success = true;
-                } 
-                else result.Message = "Объем должен быть целым положительным числом";    
-            }
-            else result.Message = "Идентификатор должен быть целым положительным числом";
-
-            return result;
+            ShowcaseRepository.Update(showcase);
+            
+            return new Result(true);
         }
 
         /// <summary>
@@ -276,29 +269,24 @@ namespace Shop.Controller
             Output.WriteLine("Удалить витрину", ConsoleColor.Cyan);
 
             if (ShowcaseRepository.ActivesCount() == 0)
-                return new Result() { Message = "Нет витрин для удаления" };
+                return new Result("Нет витрин для удаления");
 
             PrintShowcasesAction(false);
 
-            IResult result = new Result();
-
             Output.Write("\r\nВведите Id витрины для удаления: ", ConsoleColor.Yellow);
-            if (int.TryParse(Console.ReadLine(), out int id) && id > 0)
-            {
-                Showcase showcase = ShowcaseRepository.GetById(id);
+            if (!int.TryParse(Console.ReadLine(), out int id) || id > 0)
+                return new Result("Идентификатор должен быть ценым положительным числом");
 
-                if (showcase == null)
-                    return new Result() { Message = "Витрина не найдена" };
+            Showcase showcase = ShowcaseRepository.GetById(id);
+
+            if (showcase == null)
+                return new Result("Витрина не найдена");
              
-                if (ShowcaseRepository.GetShowcaseProductsIds(showcase).Count != 0)
-                    return new Result() { Message = "Невозможно удалить витрину, на которой размещены товары" };
-                     
-                ShowcaseRepository.Remove(showcase.Id);
-                result.Success = true;
-            }
-            else result.Message = "Идентификатор должен быть ценым положительным числом";
-                
-            return result;
+            if (ShowcaseRepository.GetShowcaseProductsIds(showcase).Count != 0)
+                return new Result("Невозможно удалить витрину, на которой размещены товары");
+
+            ShowcaseRepository.Remove(showcase.Id);
+            return new Result(true);
         }
 
         /// <summary>
@@ -310,9 +298,7 @@ namespace Shop.Controller
             Console.Clear();
 
             if (ShowcaseRepository.ActivesCount() == 0 || ProductRepository.Count() == 0)
-                return new Result() { Message = "Нет товара и витрин для отображения" };
-
-            IResult result = new Result();
+                return new Result("Нет товара и витрин для отображения");
 
             Output.Write("Размещение товара на витрине", ConsoleColor.Yellow);
 
@@ -320,44 +306,40 @@ namespace Shop.Controller
 
             Output.Write("\r\nВведите Id витрины: ");
 
-            if (int.TryParse(Console.ReadLine(), out int scId) && scId > 0)
-            {
-                Showcase showcase = ShowcaseRepository.GetById(scId);
+            if (!int.TryParse(Console.ReadLine(), out int scId) || scId > 0)
+                return new Result("Идентификатор витрины должен быть положительным числом");
+             
+            Showcase showcase = ShowcaseRepository.GetById(scId);
 
-                if (showcase == null || showcase.RemovedAt.HasValue)
-                    return new Result() { Message = "Витрины с идентификатором " + scId + " не найдено" };
+            if (showcase == null || showcase.RemovedAt.HasValue)
+                return new Result("Витрины с идентификатором " + scId + " не найдено");
 
-                Console.Clear();
-                PrintProductsAction(false);
+            Console.Clear();
+            PrintProductsAction(false);
 
-                Output.Write("\r\nВведите Id товара: ");
-                if (int.TryParse(Console.ReadLine(), out int pId) && pId > 0)
-                {
-                    Product product = ProductRepository.GetById(pId);
+            Output.Write("\r\nВведите Id товара: ");
 
-                    if (product == null)
-                        return new Result() { Message = "Товара с идентификатором " + pId + " не найдено" };
+            if (!int.TryParse(Console.ReadLine(), out int pId) || pId > 0)
+                return new Result("Идентификатор товара должен быть положительным числом");
 
-                    Output.Write("Выбран товар ");
-                    Output.WriteLine(product.Name, ConsoleColor.Cyan);
+            Product product = ProductRepository.GetById(pId);
 
-                    Output.Write("Введите количество: ");
-                    if (int.TryParse(Console.ReadLine(), out int quantity) && quantity > 0)
-                    {
-                        Output.Write("Введите стоимость: ");
-                        if (int.TryParse(Console.ReadLine(), out int cost) && cost > 0)
-                        {
-                            return ShowcaseRepository.Place(showcase.Id, product, quantity, cost);
-                        }
-                        else result.Message = "Стоимость товара должна быть положительным числом";
-                    }
-                    else result.Message = "Количество товара должно быть положительным числом";
-                }
-                else result.Message = "Идентификатор товара должен быть положительным числом";
-            } 
-            else result.Message = "Идентификатор витрины должен быть положительным числом";
+            if (product == null)
+                return new Result("Товара с идентификатором " + pId + " не найдено");
 
-            return result;
+            Output.Write("Выбран товар ");
+            Output.WriteLine(product.Name, ConsoleColor.Cyan);
+
+            Output.Write("Введите количество: ");
+            if (!int.TryParse(Console.ReadLine(), out int quantity) || quantity > 0)
+                return new Result("Количество товара должно быть положительным числом");
+
+            Output.Write("Введите стоимость: ");
+
+            if (!int.TryParse(Console.ReadLine(), out int cost) || cost > 0)
+                return new Result("Стоимость товара должна быть положительным числом");
+
+            return ShowcaseRepository.Place(showcase.Id, product, quantity, cost);
         }
 
         /// <summary>
