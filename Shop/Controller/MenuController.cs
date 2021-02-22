@@ -1,5 +1,4 @@
 ﻿using Shop.Model;
-using System;
 using System.Collections.Generic;
 
 namespace Shop.Controller
@@ -34,23 +33,21 @@ namespace Shop.Controller
             });
         }
 
-        internal void Prev()
+        public void Prev()
         {
             if (SelectedIndex > 0)
                 SelectedIndex--;
             else
                 SelectedIndex = (Current.Children.Count > 0) ? Current.Children.Count - 1 : 0;
         }
-
-        internal void Next()
+        public void Next()
         {
             if (SelectedIndex < Current.Children.Count - 1)
                 SelectedIndex++;
             else
                 SelectedIndex = 0;
         }
-
-        internal void Return()
+        public void Return()
         {
             if (SelectedIndex > 0)
                 SelectedIndex = 0;
@@ -59,7 +56,7 @@ namespace Shop.Controller
                     Current = Current.Parent;
         }
 
-        internal void Open(IContainerMenuItem container)
+        public void Expand(IContainerMenuItem container)
         {
             Current = container;
             SelectedIndex = 0;

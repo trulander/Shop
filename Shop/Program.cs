@@ -40,7 +40,7 @@ namespace Shop
                                 shop.RouteTo(action.Command);
                                 break;
                             case IContainerMenuItem container:
-                                menu.Open(container);
+                                menu.Expand(container);
                                 break;
                         }
                         break;
@@ -58,7 +58,7 @@ namespace Shop
                         break;
                     case ConsoleKey.RightArrow:
                         if (menu.Current.Children[menu.SelectedIndex] is IContainerMenuItem containerItem)
-                            menu.Open(containerItem);
+                            menu.Expand(containerItem);
                         break;
                 }
             }
