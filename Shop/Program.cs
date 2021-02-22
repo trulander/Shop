@@ -9,6 +9,7 @@ namespace Shop
     {
         static void Main(string[] args)
         {
+            MenuController menu = new MenuController();
             ShopController shop = new ShopController();
             shop.Login();
 
@@ -17,14 +18,14 @@ namespace Shop
             do
             {
                 Console.Clear();
-                Output.WriteLine(shop.CurrentMenu.GetFullPathText(), ConsoleColor.Yellow);//U+00BB
+                Output.WriteLine(menu.Current.GetFullPathText(), ConsoleColor.Yellow);
                 Console.WriteLine();
 
-                for (int i = 0; i < shop.CurrentMenu.Children.Count; i++)
+                for (int i = 0; i < menu.Current.Children.Count; i++)
                 {
-                    IMenuItem item = shop.CurrentMenu.Children[i];
+                    IMenuItem item = menu.Current.Children[i];
 
-                    if (i != shop.SelectedMenuIndex)
+                    if (i != menu.SelectedIndex)
                         Console.WriteLine("  " + item.Text);
                     else
                         Output.WriteLine("\u00A7 " + item.Text, ConsoleColor.Cyan);
@@ -33,45 +34,31 @@ namespace Shop
                 switch(Console.ReadKey(true).Key)
                 {
                     case ConsoleKey.Enter:
-                        switch (shop.CurrentMenu.Children[shop.SelectedMenuIndex])
+                        switch (menu.Current.Children[menu.SelectedIndex])
                         {
                             case ActionMenuItem action:
                                 shop.RouteTo(action.Command);
                                 break;
-                            case ContainerMenuItem container:
-                                shop.CurrentMenu = container;
-                                shop.SelectedMenuIndex = 0;
+                            case IContainerMenuItem container:
+                                menu.Open(container);
                                 break;
                         }
                         break;
                     case ConsoleKey.UpArrow:
-                        if (shop.SelectedMenuIndex > 0)
-                            shop.SelectedMenuIndex--;
-                        else
-                            shop.SelectedMenuIndex = shop.CurrentMenu.Children.Count - 1;
+                        menu.Prev();
                         break;
                     case ConsoleKey.DownArrow:
-                        if (shop.SelectedMenuIndex < shop.CurrentMenu.Children.Count - 1)
-                            shop.SelectedMenuIndex++;
-                        else
-                            shop.SelectedMenuIndex = 0;
+                        menu.Next();
                         break;
 
                     case ConsoleKey.Backspace:
                     case ConsoleKey.LeftArrow:
                     case ConsoleKey.Escape:
-                        if (shop.SelectedMenuIndex > 0)
-                            shop.SelectedMenuIndex = 0;
-                        else
-                            if (shop.CurrentMenu.Parent != null)
-                                shop.CurrentMenu = shop.CurrentMenu.Parent;
+                        menu.Return();
                         break;
                     case ConsoleKey.RightArrow:
-                        if (shop.CurrentMenu.Children[shop.SelectedMenuIndex] is ContainerMenuItem containerItem)
-                        {
-                            shop.CurrentMenu = containerItem;
-                            shop.SelectedMenuIndex = 0;
-                        }                            
+                        if (menu.Current.Children[menu.SelectedIndex] is IContainerMenuItem containerItem)
+                            menu.Open(containerItem);
                         break;
                 }
             }

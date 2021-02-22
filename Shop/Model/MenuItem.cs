@@ -2,7 +2,7 @@
 {
     abstract class MenuItem: IMenuItem
     {
-        public ContainerMenuItem Parent { get; set; }
+        public IContainerMenuItem Parent { get; set; }
         public string Text { get; set; }
 
         public MenuItem(string text)
@@ -19,7 +19,6 @@
 
             return full + Text;
         }
-
         public override string ToString() => Text;
     }
 }

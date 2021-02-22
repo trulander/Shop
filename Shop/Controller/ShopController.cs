@@ -15,40 +15,11 @@ namespace Shop.Controller
         //public List<Showcase> Showcases { get; set; }
         //int _lastInsertedShowcaseId = 0;
 
-        public ContainerMenuItem Menu { get; set; }
-        public ContainerMenuItem CurrentMenu;
-        public int SelectedMenuIndex { get; set; } = 0;
-
         public void Login() => IsLoggedIn = true;
         public void Logout() => IsLoggedIn = false;
 
         public ShopController()
         {
-            Menu = new ContainerMenuItem("Магазин", new List<IMenuItem>()
-            {
-                new ContainerMenuItem("Витрины", new List<IMenuItem>(){
-                    new ActionMenuItem("Показать активные", "showcase.show"),
-                    new ActionMenuItem("Показать корзину", "showcase.trash"),
-                    new ActionMenuItem("Добавить", "showcase.create"),
-                    new ActionMenuItem("Изменить", "showcase.edit"),
-                    new ActionMenuItem("Удалить", "showcase.remove"),
-                    new ContainerMenuItem("Дополнительно", new List<IMenuItem>(){
-                        new ActionMenuItem("Показать товары на витрине", "showcase.products"),
-                        new ActionMenuItem("Разместить товар на витрине", "showcase.place_product"),
-                    }),
-                }),
-                new ContainerMenuItem("Товары", new List<IMenuItem>(){
-                    new ActionMenuItem("Показать все", "product.show"),
-                    new ActionMenuItem("Добавить", "product.create"),
-                    new ActionMenuItem("Изменить", "product.edit"),
-                    new ActionMenuItem("Удалить", "product.remove")
-                }),
-                new ActionMenuItem("Выход", "app.exit")
-            });
-
-            CurrentMenu = Menu;
-
-
             ProductRepository = new ProductRepository();
             ProductRepository.Seed(2);
 
@@ -56,6 +27,7 @@ namespace Shop.Controller
             ShowcaseRepository.Seed(2);
         }
 
+        //Будут делегаты, будет жизнь
         public void RouteTo(string command)
         {
             switch (command)
@@ -473,11 +445,17 @@ namespace Shop.Controller
             else
                 Output.WriteLine("Доступные витрины", ConsoleColor.Yellow);
 
+            int count = 0;
+
             foreach (Showcase showcase in ShowcaseRepository.All())
-            {
                 if ((showOnlyDeleted && showcase.RemovedAt.HasValue) || (!showOnlyDeleted && !showcase.RemovedAt.HasValue))
+                {
                     Output.WriteLine(showcase.ToString());
-            }                
+                    count++;
+                }
+
+            if (count == 0)
+                Output.WriteLine("Нет витрин для отображения");
 
             if (waitPressKey)
                 Console.ReadKey();

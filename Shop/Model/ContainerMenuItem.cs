@@ -2,14 +2,12 @@
 
 namespace Shop.Model
 {
-    class ContainerMenuItem: MenuItem
+    class ContainerMenuItem: MenuItem, IContainerMenuItem
     {
-        public List<IMenuItem> Children { get; set; }
+        public List<IMenuItem> Children { get; set; } = new List<IMenuItem>();
 
         public ContainerMenuItem(string text, IEnumerable<IMenuItem> children = null):base(text)
         {
-            Children = new List<IMenuItem>();
-
             foreach (IMenuItem item in children)
             {
                 item.Parent = this;
