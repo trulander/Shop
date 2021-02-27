@@ -81,9 +81,9 @@ namespace Shop.Controller
         /// <returns></returns>
         IResult ProductCreateAction()
         {
-            IResult result = new Result();
+            var result = new Result();
             Output.WriteLine("\r\nДобавить товар:", ConsoleColor.Yellow);
-            Product p = new Product();
+            var p = new Product();
             Output.Write("Наименование:");
             p.Name = Console.ReadLine();
             Output.Write("Занимаемый объем:");
@@ -91,7 +91,7 @@ namespace Shop.Controller
             if (int.TryParse(Console.ReadLine(), out int capacity))
                 p.Capacity = capacity;
 
-            IResult validateResult = p.Validate();
+            var validateResult = p.Validate();
 
             if (!validateResult.Success)
                 return validateResult;
@@ -110,14 +110,14 @@ namespace Shop.Controller
         {
             PrintProductsAction(false);
 
-            IResult result = new Result();
+            var result = new Result();
 
             Output.Write("\r\nВведите id товара: ", ConsoleColor.Yellow);
 
             if (!int.TryParse(Console.ReadLine(), out int pid))
                 return new Result("Идентификатор должен быть целым положительным числом");
             
-            Product product = ProductRepository.GetById(pid);
+            var product = ProductRepository.GetById(pid);
 
             if (product == null)
                 return new Result("Товар с идентификатором " + pid + " не найден");
@@ -147,7 +147,7 @@ namespace Shop.Controller
             }
             else Output.WriteLine("Нельзя изменить объем товара, размещенного на витрине", ConsoleColor.Yellow);
 
-            IResult validateResult = product.Validate();
+            var validateResult = product.Validate();
 
             if (!validateResult.Success)
                 return validateResult;
@@ -171,7 +171,7 @@ namespace Shop.Controller
             if (!int.TryParse(Console.ReadLine(), out int id) || id > 0)
                 return new Result("Идентификатор должен быть целым положительным числом");
 
-            Product product = ProductRepository.GetById(id);
+            var product = ProductRepository.GetById(id);
 
             if (product == null)
                 return new Result("Товар с идентификатором " + id + " не найден");
@@ -188,7 +188,7 @@ namespace Shop.Controller
         /// <returns></returns>
         IResult ShowcaseCreateAction()
         {
-            IResult result = new Result();
+            var result = new Result();
             Console.Clear();
             Output.WriteLine("Добавить витрину", ConsoleColor.Yellow);
             Showcase showcase = new Showcase();
@@ -199,7 +199,7 @@ namespace Shop.Controller
             if (int.TryParse(Console.ReadLine(), out int maxCapacity))
                 showcase.MaxCapacity = maxCapacity;
 
-            IResult validateResult = showcase.Validate();
+            var validateResult = showcase.Validate();
 
             if (!validateResult.Success)
                 return validateResult;
@@ -249,7 +249,7 @@ namespace Shop.Controller
 
             showcase.MaxCapacity = capacityInt;
 
-            IResult validateResult = showcase.Validate();
+            var validateResult = showcase.Validate();
 
             if (!validateResult.Success)
                 return validateResult;
@@ -322,7 +322,7 @@ namespace Shop.Controller
             if (!int.TryParse(Console.ReadLine(), out int pId) || pId > 0)
                 return new Result("Идентификатор товара должен быть положительным числом");
 
-            Product product = ProductRepository.GetById(pId);
+            var product = ProductRepository.GetById(pId);
 
             if (product == null)
                 return new Result("Товара с идентификатором " + pId + " не найдено");
@@ -406,7 +406,7 @@ namespace Shop.Controller
 
                 foreach (int pId in ids)
                 {
-                    Product product = ProductRepository.GetById(pId);
+                    var product = ProductRepository.GetById(pId);
 
                     if (product != null)
                         Output.WriteLine(product.ToString());
@@ -431,7 +431,7 @@ namespace Shop.Controller
             else
                 Output.WriteLine("Доступные витрины", ConsoleColor.Yellow);
 
-            int count = 0;
+            var count = 0;
 
             foreach (Showcase showcase in ShowcaseRepository.All())
                 if ((showOnlyDeleted && showcase.RemovedAt.HasValue) || (!showOnlyDeleted && !showcase.RemovedAt.HasValue))

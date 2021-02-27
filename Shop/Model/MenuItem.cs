@@ -12,7 +12,7 @@
 
         public string GetFullPathText()
         {
-            string full = Parent?.GetFullPathText();
+            var full = Parent?.GetFullPathText();
 
             if (!string.IsNullOrWhiteSpace(full))
                 full += " \u00BB ";

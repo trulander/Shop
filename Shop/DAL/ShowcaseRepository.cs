@@ -17,8 +17,8 @@ namespace Shop.DAL
 
         public int ActivesCount()
         {
-            int count = 0;
-            foreach (Showcase item in _items)
+            var count = 0;
+            foreach (var item in _items)
                 if (!item.RemovedAt.HasValue)
                     count++;
             return count;
@@ -26,8 +26,8 @@ namespace Shop.DAL
 
         public int RemovedCount()
         {
-            int count = 0;
-            foreach (Showcase item in _items)
+            var count = 0;
+            foreach (var item in _items)
                 if (item.RemovedAt.HasValue)
                     count++;
             return count;
@@ -75,7 +75,7 @@ namespace Shop.DAL
 
         public void Seed(int count)
         {
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < count; i++)
             {
                 _items.Add(new Showcase()
                 {
@@ -89,7 +89,7 @@ namespace Shop.DAL
 
         public IResult Place(int showcaseId, Product product, int quantity, decimal cost)
         {
-            Showcase showcase = GetById(showcaseId);
+            var showcase = GetById(showcaseId);
 
             if (showcase == null)
                 return new Result("Витрина с идентификатором " + showcaseId + " не найдена");
@@ -100,12 +100,12 @@ namespace Shop.DAL
             if (showcase.Capacity + (product.Capacity * quantity) > showcase.MaxCapacity)
                 return new Result("Объем витрины не позволяет разместить товар");
 
-            ProductShowcase ps = new ProductShowcase(showcaseId, product.Id, quantity, cost)
+            var ps = new ProductShowcase(showcaseId, product.Id, quantity, cost)
             {
                 Id = ++_lastProductInsertedId
             };
 
-            IResult validate = ps.Validate();
+            var validate = ps.Validate();
 
             if (validate.Success)
             {
@@ -118,8 +118,8 @@ namespace Shop.DAL
 
         public List<int> GetShowcaseProductsIds(Showcase showcase)
         {
-            List<int> ids = new List<int>();
-            foreach (ProductShowcase psc in _products)
+            var ids = new List<int>();
+            foreach (var psc in _products)
                 if (showcase.Id == psc.ShowcaseId)
                     ids.Add(psc.ProductId);
 
@@ -127,7 +127,7 @@ namespace Shop.DAL
         }
         public void TakeOut(Product product)
         {
-            for (int i = 0; i < _products.Count; i++)
+            for (var i = 0; i < _products.Count; i++)
             {
                 if (_products[i].ProductId.Equals(product.Id))
                 {
@@ -139,8 +139,8 @@ namespace Shop.DAL
 
         public List<ProductShowcase> GetShowcaseProducts(Showcase showcase)
         {
-            List<ProductShowcase> result = new List<ProductShowcase>();
-            foreach (ProductShowcase psc in _products)
+            var result = new List<ProductShowcase>();
+            foreach (var psc in _products)
                 if (showcase.Id == psc.ShowcaseId)
                     result.Add(psc);
 

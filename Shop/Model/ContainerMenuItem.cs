@@ -8,7 +8,7 @@ namespace Shop.Model
 
         public ContainerMenuItem(string text, IEnumerable<IMenuItem> children = null):base(text)
         {
-            foreach (IMenuItem item in children)
+            foreach (var item in children)
             {
                 item.Parent = this;
                 Children.Add(item);

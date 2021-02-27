@@ -9,8 +9,8 @@ namespace Shop
     {
         static void Main(string[] args)
         {
-            MenuController menu = new MenuController();
-            ShopController shop = new ShopController();
+            var menu = new MenuController();
+            var shop = new ShopController();
             shop.Login();
 
             Console.OutputEncoding = Encoding.UTF8;

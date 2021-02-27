@@ -19,7 +19,7 @@ namespace Shop.DAL
 
         public Product GetById(int id)
         {
-            for (int i = 0; i < _items.Count; i++)
+            for (var i = 0; i < _items.Count; i++)
                 if (_items[i].Id.Equals(id))
                     return _items[i];
 
@@ -28,7 +28,7 @@ namespace Shop.DAL
 
         public void Remove(int id)
         {
-            for (int i = 0; i < _items.Count; i++)
+            for (var i = 0; i < _items.Count; i++)
                 if (_items[i].Id.Equals(id))
                 {
                     _items.RemoveAt(i);
@@ -38,7 +38,7 @@ namespace Shop.DAL
 
         public void Update(Product entity)
         {
-            for (int i = 0; i < _items.Count; i++)
+            for (var i = 0; i < _items.Count; i++)
             {
                 if (_items[i].Id.Equals(entity.Id))
                 {
@@ -50,7 +50,7 @@ namespace Shop.DAL
 
         public void Seed(int count)
         {
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < count; i++)
             {
                 _items.Add(new Product()
                 {
@@ -63,10 +63,10 @@ namespace Shop.DAL
 
         public int ProductsCapacity(List<ProductShowcase> productsShowcase)
         {
-            int capacity = 0;
+            var capacity = 0;
 
-            foreach (ProductShowcase item in productsShowcase)
-                foreach (Product product in _items)
+            foreach (var item in productsShowcase)
+                foreach (var product in _items)
                     if (product.Id == item.ProductId)
                         capacity += item.Quantity * product.Capacity;
 
