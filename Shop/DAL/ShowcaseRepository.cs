@@ -1,6 +1,7 @@
 ﻿using Shop.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Shop.DAL
 {
@@ -15,23 +16,8 @@ namespace Shop.DAL
         public int Count() => _items.Count;
         public IEnumerable<Showcase> All() => _items;
 
-        public int ActivesCount()
-        {
-            var count = 0;
-            foreach (var item in _items)
-                if (!item.RemovedAt.HasValue)
-                    count++;
-            return count;
-        }
-
-        public int RemovedCount()
-        {
-            var count = 0;
-            foreach (var item in _items)
-                if (item.RemovedAt.HasValue)
-                    count++;
-            return count;
-        }
+        public int ActivesCount() => _items.Count(x => !x.RemovedAt.HasValue);
+        public int RemovedCount() => _items.Count(x => x.RemovedAt.HasValue);
 
         public void Add(Showcase entity)
         {
@@ -40,25 +26,17 @@ namespace Shop.DAL
             _items.Add(entity);
         }
 
-        public Showcase GetById(int id)
-        {
-            for (int i = 0; i < _items.Count; i++)
-                if (_items[i].Id.Equals(id))
-                    return _items[i];
-
-            return null;
-        }
+        public Showcase GetById(int id) => _items.Find(x => x.Id == id);
 
         public void Remove(int id)
         {
-            for (int i = 0; i < _items.Count; i++)
-            {
-                if (_items[i].Id.Equals(id))
+            _items
+                .Where(x => x.Id == id)
+                .Select(x =>
                 {
-                    _items[i].RemovedAt = DateTime.Now;
-                    break;
-                }
-            }
+                    x.RemovedAt = DateTime.Now;
+                    return x;
+                });
         }
 
         public void Update(Showcase entity)
@@ -94,7 +72,7 @@ namespace Shop.DAL
             if (showcase == null)
                 return new Result("Витрина с идентификатором " + showcaseId + " не найдена");
 
-            if (GetShowcaseProductsIds(showcase).Count > 0)
+            if (Enumerable.Count(GetShowcaseProductsIds(showcase)) > 0)
                 return new Result("Витрина уже содержит товар с указанным идентификатором");
 
             if (showcase.Capacity + (product.Capacity * quantity) > showcase.MaxCapacity)
@@ -112,39 +90,23 @@ namespace Shop.DAL
                 _products.Add(ps);
                 return new Result(true);
             }
-            else 
+            else
                 return validate;
         }
 
-        public List<int> GetShowcaseProductsIds(Showcase showcase)
+        public IEnumerable<int> GetShowcaseProductsIds(Showcase showcase)
         {
-            var ids = new List<int>();
-            foreach (var psc in _products)
-                if (showcase.Id == psc.ShowcaseId)
-                    ids.Add(psc.ProductId);
-
-            return ids;
+            return _products
+                .Where(x => x.ShowcaseId == showcase.Id)
+                .Select(x => x.ProductId);
         }
-        public void TakeOut(Product product)
-        {
-            for (var i = 0; i < _products.Count; i++)
-            {
-                if (_products[i].ProductId.Equals(product.Id))
-                {
-                    _products.RemoveAt(i);
-                    break;
-                }
-            }
-        }
+        public void TakeOut(Product product) => _products.RemoveAll(x => x.ProductId == product.Id);
 
-        public List<ProductShowcase> GetShowcaseProducts(Showcase showcase)
+        public IEnumerable<ProductShowcase> GetShowcaseProducts(Showcase showcase)
         {
-            var result = new List<ProductShowcase>();
-            foreach (var psc in _products)
-                if (showcase.Id == psc.ShowcaseId)
-                    result.Add(psc);
-
-            return result;
+            return _products
+                .Where(x => x.ShowcaseId == showcase.Id)
+                .ToList();
         }
     }
 }

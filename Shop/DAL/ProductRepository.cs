@@ -5,7 +5,7 @@ namespace Shop.DAL
 {
     class ProductRepository : IProductRepository
     {
-        readonly List<Product> _items = new List<Product>();
+        private readonly List<Product> _items = new List<Product>();
         int _lastInsertedId = 0;
 
         public int Count() => _items.Count;
@@ -17,14 +17,7 @@ namespace Shop.DAL
             _items.Add(entity);
         }
 
-        public Product GetById(int id)
-        {
-            for (var i = 0; i < _items.Count; i++)
-                if (_items[i].Id.Equals(id))
-                    return _items[i];
-
-            return null;
-        }
+        public Product GetById(int id) => _items.Find(x => x.Id == id);
 
         public void Remove(int id)
         {
@@ -61,7 +54,7 @@ namespace Shop.DAL
             }
         }
 
-        public int ProductsCapacity(List<ProductShowcase> productsShowcase)
+        public int ProductsCapacity(IEnumerable<ProductShowcase> productsShowcase)
         {
             var capacity = 0;
 

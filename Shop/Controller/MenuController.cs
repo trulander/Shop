@@ -1,5 +1,4 @@
 ﻿using Shop.Model;
-using System.Collections.Generic;
 
 namespace Shop.Controller
 {
@@ -8,29 +7,9 @@ namespace Shop.Controller
         public IContainerMenuItem Current { get; private set; }
         public int SelectedIndex { get; private set; } = 0;
 
-        public MenuController()
+        public MenuController(IContainerMenuItem root)
         {
-            Current = new ContainerMenuItem("Магазин", new List<IMenuItem>()
-            {
-                new ContainerMenuItem("Витрины/Полки", new List<IMenuItem>(){
-                    new ActionMenuItem("Показать активные", "showcase.show"),
-                    new ActionMenuItem("Показать корзину", "showcase.trash"),
-                    new ActionMenuItem("Добавить", "showcase.create"),
-                    new ActionMenuItem("Изменить", "showcase.edit"),
-                    new ActionMenuItem("Удалить", "showcase.remove"),
-                    new ContainerMenuItem("Дополнительно", new List<IMenuItem>(){
-                        new ActionMenuItem("Показать товары на витрине", "showcase.products"),
-                        new ActionMenuItem("Разместить товар на витрине", "showcase.place_product"),
-                    }),
-                }),
-                new ContainerMenuItem("Товары", new List<IMenuItem>(){
-                    new ActionMenuItem("Показать все", "product.show"),
-                    new ActionMenuItem("Добавить", "product.create"),
-                    new ActionMenuItem("Изменить", "product.edit"),
-                    new ActionMenuItem("Удалить", "product.remove")
-                }),
-                new ActionMenuItem("Выход", "app.exit")
-            });
+            Current = root;
         }
 
         public void Prev()

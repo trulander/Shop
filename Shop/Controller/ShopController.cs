@@ -1,7 +1,8 @@
 ﻿using Shop.DAL;
 using Shop.Model;
 using System;
-using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 
 namespace Shop.Controller
 {
@@ -11,9 +12,6 @@ namespace Shop.Controller
 
         private IProductRepository ProductRepository { get; set; }
         private IShowcaseRepository ShowcaseRepository { get; set; }
-
-        //public List<Showcase> Showcases { get; set; }
-        //int _lastInsertedShowcaseId = 0;
 
         public void Login() => IsLoggedIn = true;
         public void Logout() => IsLoggedIn = false;
@@ -27,59 +25,13 @@ namespace Shop.Controller
             ShowcaseRepository.Seed(2);
         }
 
-        //Будут делегаты, будет жизнь
-        public void RouteTo(string command)
-        {
-            switch (command)
-            {
-                case "product.show":
-                    PrintProductsAction();
-                    break;
-                case "product.create":
-                    ShowResult(ProductCreateAction());
-                    break;
-                case "product.edit":
-                    ShowResult(ProductUpdateAction());
-                    break;
-                case "product.remove":
-                    ShowResult(ProductRemoveAction());
-                    break;
-
-                case "showcase.show":
-                    PrintShowcasesAction();
-                    break;
-                case "showcase.create":
-                    ShowResult(ShowcaseCreateAction());
-                    break;
-                case "showcase.edit":
-                    ShowResult(ShowcaseUpdateAction());
-                    break;
-                case "showcase.remove":
-                    ShowResult(ShowcaseRemoveAction());
-                    break;
-                case "showcase.place_product":
-                    ShowResult(PlaceProductAction());
-                    break;
-                case "showcase.products":
-                    PrintShowcaseProductsAction();
-                    break;
-                case "showcase.trash":
-                    PrintShowcasesAction(showOnlyDeleted: true);
-                    break;
-
-                case "app.exit":
-                     Logout();
-                    break;
-            }
-        }
-
         #region Actions
 
         /// <summary>
         /// Вызывает сценарий создания товара
         /// </summary>
         /// <returns></returns>
-        IResult ProductCreateAction()
+        public IResult ProductCreateAction()
         {
             var result = new Result();
             Output.WriteLine("\r\nДобавить товар:", ConsoleColor.Yellow);
@@ -106,9 +58,9 @@ namespace Shop.Controller
         /// Вызывает сценарий изменения товара
         /// </summary>
         /// <returns></returns>
-        IResult ProductUpdateAction()
+        public IResult ProductUpdateAction()
         {
-            PrintProductsAction(false);
+            PrintProductsAction();
 
             var result = new Result();
 
@@ -131,8 +83,8 @@ namespace Shop.Controller
             //Не даем возможность менять объем товара размещенного на витрине
             bool placedInShowcase = false;
 
-            foreach (Showcase showcase in ShowcaseRepository.All())
-                if (ShowcaseRepository.GetShowcaseProductsIds(showcase).Count > 0)
+            foreach (var showcase in ShowcaseRepository.All())
+                if (Enumerable.Count(ShowcaseRepository.GetShowcaseProductsIds(showcase)) > 0)
                 {
                     placedInShowcase = true;
                     break;
@@ -163,9 +115,9 @@ namespace Shop.Controller
         /// Вызывает сценарий удаления товара
         /// </summary>
         /// <returns></returns>
-        IResult ProductRemoveAction()
+        public IResult ProductRemoveAction()
         {
-            PrintProductsAction(false);
+            PrintProductsAction();
 
             Output.Write("\r\nВведите Id товара: ", ConsoleColor.Yellow);
             if (!int.TryParse(Console.ReadLine(), out int id) || id > 0)
@@ -186,12 +138,12 @@ namespace Shop.Controller
         /// Вызывает сценарий обновления витрины
         /// </summary>
         /// <returns></returns>
-        IResult ShowcaseCreateAction()
+        public IResult ShowcaseCreateAction()
         {
             var result = new Result();
             Console.Clear();
             Output.WriteLine("Добавить витрину", ConsoleColor.Yellow);
-            Showcase showcase = new Showcase();
+            var showcase = new Showcase();
             Output.Write("Наименование: ");
             showcase.Name = Console.ReadLine();
             Output.Write("Максимально допустимый объем витрины: ");
@@ -214,7 +166,7 @@ namespace Shop.Controller
         /// Вызывает сценарий обновления витрины
         /// </summary>
         /// <returns></returns>
-        IResult ShowcaseUpdateAction()
+        public IResult ShowcaseUpdateAction()
         {
             PrintShowcasesAction(false);
 
@@ -223,13 +175,13 @@ namespace Shop.Controller
             if (!int.TryParse(Console.ReadLine(), out int id))
                 return new Result("Идентификатор должен быть целым положительным числом");
             
-            Showcase showcase = ShowcaseRepository.GetById(id);
+            var showcase = ShowcaseRepository.GetById(id);
 
             if (showcase == null || showcase.RemovedAt.HasValue)
                 return new Result("Витрина с идентификатором " + id + " не найдена");
 
             Output.Write("Наименование (" + showcase.Name + "):");
-            string name = Console.ReadLine();
+            var name = Console.ReadLine();
 
             if (!string.IsNullOrWhiteSpace(name))
                 showcase.Name = name;
@@ -241,8 +193,9 @@ namespace Shop.Controller
                 return new Result("Объем должен быть целым положительным числом");
 
             //Чекаем изменение объема в меньшую сторону
-            List<ProductShowcase> productShowcases = ShowcaseRepository.GetShowcaseProducts(showcase);
-            int showcaseFullness = ProductRepository.ProductsCapacity(productShowcases);
+            var productShowcases = ShowcaseRepository.GetShowcaseProducts(showcase);
+
+            var showcaseFullness = ProductRepository.ProductsCapacity(productShowcases);
 
             if (showcaseFullness > capacityInt)
                 return new Result("Невозможно установить заданный объем, объем размещенного товара превышеает значение");
@@ -263,7 +216,7 @@ namespace Shop.Controller
         /// Вызывает сценарий удаления витрины
         /// </summary>
         /// <returns></returns>
-        IResult ShowcaseRemoveAction()
+        public IResult ShowcaseRemoveAction()
         {
             Console.Clear();
             Output.WriteLine("Удалить витрину", ConsoleColor.Cyan);
@@ -277,12 +230,12 @@ namespace Shop.Controller
             if (!int.TryParse(Console.ReadLine(), out int id) || id > 0)
                 return new Result("Идентификатор должен быть ценым положительным числом");
 
-            Showcase showcase = ShowcaseRepository.GetById(id);
+            var showcase = ShowcaseRepository.GetById(id);
 
             if (showcase == null)
                 return new Result("Витрина не найдена");
              
-            if (ShowcaseRepository.GetShowcaseProductsIds(showcase).Count != 0)
+            if (Enumerable.Count(ShowcaseRepository.GetShowcaseProductsIds(showcase)) != 0)
                 return new Result("Невозможно удалить витрину, на которой размещены товары");
 
             ShowcaseRepository.Remove(showcase.Id);
@@ -293,7 +246,7 @@ namespace Shop.Controller
         /// Вызывает сценарий размещения товара на витрине
         /// </summary>
         /// <returns></returns>
-        IResult PlaceProductAction()
+        public IResult PlaceProductAction()
         {
             Console.Clear();
 
@@ -309,13 +262,13 @@ namespace Shop.Controller
             if (!int.TryParse(Console.ReadLine(), out int scId) || scId > 0)
                 return new Result("Идентификатор витрины должен быть положительным числом");
              
-            Showcase showcase = ShowcaseRepository.GetById(scId);
+            var showcase = ShowcaseRepository.GetById(scId);
 
             if (showcase == null || showcase.RemovedAt.HasValue)
                 return new Result("Витрины с идентификатором " + scId + " не найдено");
 
             Console.Clear();
-            PrintProductsAction(false);
+            PrintProductsAction();
 
             Output.Write("\r\nВведите Id товара: ");
 
@@ -346,37 +299,30 @@ namespace Shop.Controller
         /// Вызывает сценарий отображения всех товаров
         /// </summary>
         /// <returns></returns>
-        void PrintProductsAction(bool waitPressKey = true)
+        public IResult PrintProductsAction()
         {
             Console.Clear();
 
             if (ProductRepository.Count() == 0)
-            {
-                Output.WriteLine("Нет товаров для отображения");
-                Console.ReadKey();
-                return;
-            }
+                return new Result() { Message = "Нет товаров для отображения" };
 
             Output.WriteLine("Доступные товары", ConsoleColor.Cyan);            
-            foreach (Product product in ProductRepository.All())
+            foreach (var product in ProductRepository.All())
                 Output.WriteLine(product.ToString());
 
-            if (waitPressKey)
-                Console.ReadKey();
+            return new Result(true);
         }
 
         /// <summary>
         /// Вызывает сценарий отображения всех товаров на витрине
         /// </summary>
         /// <returns></returns>
-        void PrintShowcaseProductsAction(bool waitPressKey = true)
+        public IResult PrintShowcaseProductsAction()
         {
             if (ShowcaseRepository.ActivesCount() == 0 || ProductRepository.Count() == 0)
             {
                 Console.Clear();
-                Output.WriteLine("Нет товаров и витрин для отображения");
-                Console.ReadKey();
-                return;
+                return new Result() { Message = "Нет товаров и витрин для отображения" };
             }
 
             PrintShowcasesAction(false);
@@ -385,24 +331,18 @@ namespace Shop.Controller
 
             if (int.TryParse(Console.ReadLine(), out int id))
             {
-                Showcase showcase = ShowcaseRepository.GetById(id);
+                var showcase = ShowcaseRepository.GetById(id);
 
                 if (showcase == null || showcase.RemovedAt.HasValue)
-                {
-                    Output.WriteLine("Нет витрин с указанным идентификатором");
-                    return;
-                }
+                    return new Result() { Message = "Нет витрин с указанным идентификатором" };
 
                 Output.Write("\r\nТовары на витрине ");
                 Output.WriteLine(showcase.Name + ":", ConsoleColor.Cyan);
 
-                List<int> ids = ShowcaseRepository.GetShowcaseProductsIds(showcase);
+                var ids = ShowcaseRepository.GetShowcaseProductsIds(showcase);
 
-                if (ids.Count == 0)
-                {
-                    Output.WriteLine("Нет товаров для отображения");
-                    return;
-                }
+                if (Enumerable.Count(ids) == 0)
+                    return new Result() { Message = "Нет товаров для отображения" };
 
                 foreach (int pId in ids)
                 {
@@ -412,17 +352,16 @@ namespace Shop.Controller
                         Output.WriteLine(product.ToString());
                 }
             }
-            else Output.WriteLine("Нет витрин с указанным идентификатором");
+            else return new Result() { Message = "Нет витрин с указанным идентификатором" };
 
-            if (waitPressKey)
-                Console.ReadKey();
+            return new Result(true);
         }
 
         /// <summary>
         /// Вызывает сценарий отображения витрин
         /// </summary>
         /// <returns></returns>
-        void PrintShowcasesAction(bool waitPressKey = true, bool showOnlyDeleted = false)
+        private IResult PrintShowcasesAction(bool showOnlyDeleted = false)
         {
             Console.Clear();
 
@@ -433,7 +372,7 @@ namespace Shop.Controller
 
             var count = 0;
 
-            foreach (Showcase showcase in ShowcaseRepository.All())
+            foreach (var showcase in ShowcaseRepository.All())
                 if ((showOnlyDeleted && showcase.RemovedAt.HasValue) || (!showOnlyDeleted && !showcase.RemovedAt.HasValue))
                 {
                     Output.WriteLine(showcase.ToString());
@@ -441,27 +380,14 @@ namespace Shop.Controller
                 }
 
             if (count == 0)
-                Output.WriteLine("Нет витрин для отображения");
+                return new Result() { Message = "Нет витрин для отображения" };
 
-            if (waitPressKey)
-                Console.ReadKey();
+            return new Result(true);
         }
-
+        public IResult PrintActiveShowcases() => PrintShowcasesAction(false);
+        public IResult PrintShowcasesInTrash() => PrintShowcasesAction(true);
         #endregion
 
-        /// <summary>
-        /// Выводит на экран сообщение о результате выполнения действия
-        /// </summary>
-        /// <param name="result"></param>
-        void ShowResult(IResult result)
-        {
-            if (result.Success && string.IsNullOrWhiteSpace(result.Message))
-                result.Message = "Выполнено";
 
-            Output.WriteLine(result.Message, result.Success ? ConsoleColor.Green : ConsoleColor.Red);
-
-            Output.WriteLine("Нажмите любую клавишу для продолжения..", ConsoleColor.Yellow);
-            Console.ReadKey();
-        }
     }
 }

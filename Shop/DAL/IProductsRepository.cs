@@ -5,6 +5,6 @@ namespace Shop.DAL
 {
     interface IProductRepository : IRepository<Product>
     {
-        int ProductsCapacity(List<ProductShowcase> productsShowcase);
+        int ProductsCapacity(IEnumerable<ProductShowcase> productsShowcase);
     }
 }
