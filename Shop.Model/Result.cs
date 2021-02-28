@@ -1,6 +1,6 @@
 ﻿namespace Shop.Model
 {
-    class Result: IResult
+    public class Result : IResult
     {
         public bool Success { get; set; }
         public string Message { get; set; }

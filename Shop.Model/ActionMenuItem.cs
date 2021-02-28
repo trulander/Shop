@@ -1,6 +1,6 @@
 ﻿namespace Shop.Model
 {
-    class ActionMenuItem: MenuItem
+    public class ActionMenuItem : MenuItem
     {
         public string Command { get; set; }
 

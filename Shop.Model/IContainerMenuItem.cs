@@ -2,7 +2,7 @@
 
 namespace Shop.Model
 {
-    interface IContainerMenuItem: IMenuItem
+    public interface IContainerMenuItem: IMenuItem
     {
         public List<IMenuItem> Children { get; set; }
     }

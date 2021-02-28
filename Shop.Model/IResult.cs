@@ -1,6 +1,6 @@
 ﻿namespace Shop.Model
 {
-    interface IResult
+    public interface IResult
     {
         bool Success { get; set; }
         string Message { get; set; }

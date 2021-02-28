@@ -1,6 +1,6 @@
 ﻿namespace Shop.Model
 {
-    abstract class MenuItem: IMenuItem
+    public abstract class MenuItem: IMenuItem
     {
         public IContainerMenuItem Parent { get; set; }
         public string Text { get; set; }

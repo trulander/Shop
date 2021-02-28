@@ -7,4 +7,8 @@
     <RootNamespace>Shop</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Shop.Model\Shop.Model.csproj" />
+  </ItemGroup>
+
 </Project>

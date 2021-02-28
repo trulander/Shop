@@ -1,6 +1,6 @@
 ﻿namespace Shop.Model
 {
-    class ProductShowcase: Entity
+    public class ProductShowcase : Entity
     {
         public int ShowcaseId { get; set; }
         public int ProductId { get; set; }

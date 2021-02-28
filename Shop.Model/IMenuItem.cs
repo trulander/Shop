@@ -1,6 +1,6 @@
 ﻿namespace Shop.Model
 {
-    interface IMenuItem
+    public interface IMenuItem
     {
         public IContainerMenuItem Parent { get; set; }
         public string Text { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace Shop.Model
 {
-    class Product: Entity
+    public class Product: Entity
     {
         public string Name { get; set; }
         public int Capacity { get; set; }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Shop.Model
 {
-    class Showcase : Entity
+    public class Showcase : Entity
     {
         public string Name { get; set; }
         public int MaxCapacity { get; set; }
