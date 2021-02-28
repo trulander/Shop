@@ -1,14 +1,12 @@
-﻿using System;
-
-namespace Shop.Model
+﻿namespace Shop.Model
 {
     class ActionMenuItem: MenuItem
     {
-        public Func<IResult> Action { get; private set; }
+        public string Command { get; set; }
 
-        public ActionMenuItem(string text, Func<IResult> action):base(text)
+        public ActionMenuItem(string text, string command):base(text)
         {
-            Action = action;
+            Command = command;
         }
     }
 }

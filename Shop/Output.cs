@@ -1,5 +1,4 @@
-﻿using Shop.Model;
-using System;
+﻿using System;
 
 namespace Shop
 {
@@ -16,21 +15,6 @@ namespace Shop
         {
             Write(text, color);
             Console.WriteLine();
-        }
-
-        /// <summary>
-        /// Выводит на экран сообщение о результате выполнения действия
-        /// </summary>
-        /// <param name="result"></param>
-        public static void ShowResult(IResult result)
-        {
-            if (result.Success && string.IsNullOrWhiteSpace(result.Message))
-                result.Message = "Выполнено";
-
-            WriteLine(result.Message, result.Success ? ConsoleColor.Green : ConsoleColor.Red);
-
-            WriteLine("Нажмите любую клавишу для продолжения..", ConsoleColor.Yellow);
-            Console.ReadKey();
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Shop.Controller;
 using Shop.Model;
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Shop
@@ -10,35 +9,8 @@ namespace Shop
     {
         static void Main(string[] args)
         {
+            var menu = new MenuController();
             var shop = new ShopController();
-
-            var menu = new MenuController(
-                new ContainerMenuItem("Магазин", new List<IMenuItem>()
-                {
-                    new ContainerMenuItem("Витрины/Полки", new List<IMenuItem>(){
-                        new ActionMenuItem("Показать активные", new Func<IResult>(shop.PrintActiveShowcases)),
-                        new ActionMenuItem("Показать корзину", new Func<IResult>(shop.PrintShowcasesInTrash)),
-                        new ActionMenuItem("Добавить", new Func<IResult>(shop.ShowcaseCreateAction)),
-                        new ActionMenuItem("Изменить", new Func<IResult>(shop.ShowcaseUpdateAction)),
-                        new ActionMenuItem("Удалить", new Func<IResult>(shop.ShowcaseRemoveAction)),
-                        new ContainerMenuItem("Дополнительно", new List<IMenuItem>(){
-                            new ActionMenuItem("Показать товары на витрине", new Func<IResult>(shop.PrintShowcaseProductsAction)),
-                            new ActionMenuItem("Разместить товар на витрине", new Func<IResult>(shop.PlaceProductAction)),
-                        }),
-                    }),
-                    new ContainerMenuItem("Товары", new List<IMenuItem>(){
-                        new ActionMenuItem("Показать все", new Func<IResult>(shop.PrintProductsAction)),
-                        new ActionMenuItem("Добавить", new Func<IResult>(shop.ProductCreateAction)),
-                        new ActionMenuItem("Изменить", new Func<IResult>(shop.ProductUpdateAction)),
-                        new ActionMenuItem("Удалить", new Func<IResult>(shop.ProductRemoveAction)),
-                    }),
-                    new ActionMenuItem("Выход", new Func<IResult>(() => {
-                        shop.Logout();
-                        return new Result(true);
-                    }))
-                }));
-
-            
             shop.Login();
 
             Console.OutputEncoding = Encoding.UTF8;
@@ -51,7 +23,7 @@ namespace Shop
 
                 for (int i = 0; i < menu.Current.Children.Count; i++)
                 {
-                    var item = menu.Current.Children[i];
+                    IMenuItem item = menu.Current.Children[i];
 
                     if (i != menu.SelectedIndex)
                         Console.WriteLine("  " + item.Text);
@@ -64,8 +36,8 @@ namespace Shop
                     case ConsoleKey.Enter:
                         switch (menu.Current.Children[menu.SelectedIndex])
                         {
-                            case ActionMenuItem menuItem:
-                                Output.ShowResult(menuItem.Action());
+                            case ActionMenuItem action:
+                                shop.RouteTo(action.Command);
                                 break;
                             case IContainerMenuItem container:
                                 menu.Expand(container);

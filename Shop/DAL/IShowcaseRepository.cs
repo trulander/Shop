@@ -9,8 +9,8 @@ namespace Shop.DAL
         int RemovedCount();
 
         void TakeOut(Product product);
-        IEnumerable<int> GetShowcaseProductsIds(Showcase showcase);
-        IEnumerable<ProductShowcase> GetShowcaseProducts(Showcase showcase);
+        List<int> GetShowcaseProductsIds(Showcase showcase);
+        List<ProductShowcase> GetShowcaseProducts(Showcase showcase);
 
         IResult Place(int showcaseId, Product product, int quantity, decimal cost);
     }

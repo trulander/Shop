@@ -13,7 +13,7 @@ namespace Shop.Model
 
         public override IResult Validate()
         {
-            var result = new Result(true);
+            IResult result = new Result(true);
 
             if (string.IsNullOrWhiteSpace(Name))
             {
