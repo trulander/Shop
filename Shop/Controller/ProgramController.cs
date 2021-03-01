@@ -1,6 +1,8 @@
 ﻿using Shop.Model;
 using System;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Shop.Model;
 
 namespace Shop.Controller
@@ -21,7 +23,6 @@ namespace Shop.Controller
             _server = new ServerController(_shop);
 
             Console.OutputEncoding = Encoding.UTF8;
-            
             
             MainLoop();
         }
