@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Shop.DAL
+namespace Shop.Server.DAL
 {
     class ProductShowcaseRepository : IProductShowcaseRepository
     {

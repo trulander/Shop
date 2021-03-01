@@ -1,7 +1,7 @@
 ﻿using Shop.Model;
 using System.Collections.Generic;
 
-namespace Shop.DAL
+namespace Shop.Server.DAL
 {
     internal interface IShowcaseRepository: IRepository<Showcase>
     {

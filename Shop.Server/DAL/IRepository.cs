@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Shop.DAL
+namespace Shop.Server.DAL
 {
     interface IRepository<T>
     {

@@ -1,6 +1,6 @@
 ﻿using Shop.Model;
 
-namespace Shop.DAL
+namespace Shop.Server.DAL
 {
     interface IProductShowcaseRepository: IRepository<ProductShowcase>
     {

@@ -1,9 +1,9 @@
-﻿using Shop.DAL;
-using Shop.Model;
+﻿using Shop.Model;
+using Shop.Server.DAL;
 using System;
 using System.Collections.Generic;
 
-namespace Shop.Controller
+namespace Shop.Server.Controller
 {
     class ShopController
     {
@@ -11,9 +11,6 @@ namespace Shop.Controller
 
         private IProductRepository ProductRepository { get; set; }
         private IShowcaseRepository ShowcaseRepository { get; set; }
-
-        //public List<Showcase> Showcases { get; set; }
-        //int _lastInsertedShowcaseId = 0;
 
         public void Login() => IsLoggedIn = true;
         public void Logout() => IsLoggedIn = false;

@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Shop
+namespace Shop.Model
 {
-    class Output
+    public static class Output
     {
         public static void Write(string text, ConsoleColor color = ConsoleColor.Gray)
         {
