@@ -6,15 +6,18 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
+using Shop.Model;
 
 namespace Shop.Controller
 {
     class ServerController
     {
         private static ShopController _shop;
-        public ServerController(ShopController shop)
+        private static MenuController _menu;
+        public ServerController(ShopController shop, MenuController menu)
         {
             _shop = shop;
+            _menu = menu;
             var th = new Thread(StartServer);
             th.IsBackground = false;
             th.Start();
@@ -40,6 +43,67 @@ namespace Shop.Controller
                     var postData = GetNameValues(request);
                     Console.WriteLine(postData["action"]);
 
+                    int actionPost;
+
+                    if (Int32.TryParse(postData["action"], out actionPost))
+                    {
+                        switch(actionPost)
+                        {
+                            case (int)ConsoleKey.Enter:
+                                switch (_menu.Current.Children[_menu.SelectedIndex])
+                                {
+                                    case ActionMenuItem action:
+                                        _shop.RouteTo(action.Command);
+                                        break;
+                                    case IContainerMenuItem container:
+                                        _menu.Expand(container);
+                                        break;
+                                }
+                                break;
+                            case (int)ConsoleKey.UpArrow:
+                                _menu.Prev();
+                                break;
+                            case (int)ConsoleKey.DownArrow:
+                                _menu.Next();
+                                break;
+
+                            case (int)ConsoleKey.Backspace:
+                            case (int)ConsoleKey.LeftArrow:
+                            case (int)ConsoleKey.Escape:
+                                _menu.Return();
+                                break;
+                            case (int)ConsoleKey.RightArrow:
+                                if (_menu.Current.Children[_menu.SelectedIndex] is IContainerMenuItem containerItem)
+                                    _menu.Expand(containerItem);
+                                break;
+                            default:
+                                Output.WriteLine("Server: unsupported method");
+                                responseValue = "unsupported method";
+                                break;
+                        }
+                        Console.Clear();
+                        
+                        responseValue += _menu.Current.GetFullPathText() + "\r\n";
+                        
+                        Output.WriteLine(_menu.Current.GetFullPathText(), ConsoleColor.Yellow);
+                        Console.WriteLine();
+
+                        for (int i = 0; i < _menu.Current.Children.Count; i++)
+                        {
+                            IMenuItem item = _menu.Current.Children[i];
+
+                            if (i != _menu.SelectedIndex)
+                            {
+                                responseValue += "  " + item.Text + "\r\n";
+                                Console.WriteLine("  " + item.Text);
+                            }
+                            else
+                            {
+                                responseValue += "\u00A7 " + item.Text + "\r\n";
+                                Output.WriteLine("\u00A7 " + item.Text, ConsoleColor.Cyan);
+                            }
+                        }                        
+                    }
                 }
                 else
                 {

@@ -20,7 +20,7 @@ namespace Shop.Controller
             _shop.Login();
             
             var shopIsLoggedIn = _shop.IsLoggedIn;
-            _server = new ServerController(_shop);
+            _server = new ServerController(_shop,_menu);
 
             Console.OutputEncoding = Encoding.UTF8;
             

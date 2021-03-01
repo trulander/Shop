@@ -8,17 +8,13 @@ namespace Client
 {
     public class HttpController
     {
-        public HttpController()
+        public HttpController(int action)
         {
             HttpClient httpClient = new HttpClient();
 
-            var postData = new StringContent("action=actionnumbertest", Encoding.UTF8);
-            postData.Headers.Add("test","tsssst");
+            var postData = new StringContent("action=" + action, Encoding.UTF8);
             
-            
-            var response = httpClient.PostAsync("Http://localhost:8080/?date=today", postData).Result;
-            
-
+            var response = httpClient.PostAsync("Http://localhost:8080/", postData).Result;
             
             var content = response.Content.ReadAsStringAsync().Result;
             

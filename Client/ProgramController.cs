@@ -6,9 +6,34 @@ namespace Client
     {
         public ProgramController()
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Http client for ShowCase developed by code1code.");
+            MainLoop();
+        }
 
-            HttpController httpController = new HttpController();
+        private void MainLoop()
+        {
+            
+            do
+            {
+                
+                //View.WriteLine(_menu.Current.GetFullPathText(), ConsoleColor.Yellow);
+                //Console.WriteLine();
+
+                /*for (int i = 0; i < _menu.Current.Children.Count; i++)
+                {
+                    IMenuItem item = _menu.Current.Children[i];
+
+                    if (i != _menu.SelectedIndex)
+                        Console.WriteLine("  " + item.Text);
+                    else
+                        Output.WriteLine("\u00A7 " + item.Text, ConsoleColor.Cyan);
+                }*/
+                int action = (int)Console.ReadKey(true).Key;
+                Console.Clear();
+                HttpController httpController = new HttpController(action);
+               
+            }
+            while (true);
         }
     }
 }
