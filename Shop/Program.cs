@@ -8,7 +8,9 @@ namespace Shop
     {
         static void Main(string[] args)
         {
-            ProgramController program = new ProgramController();
+            ServerController server = new ServerController(new OutputServer());
+            ProgramController program = new ProgramController(new Output());
+            program.StartProgram();
         }
     }
 }

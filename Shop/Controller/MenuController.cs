@@ -7,9 +7,11 @@ namespace Shop.Controller
     {
         public IContainerMenuItem Current { get; private set; }
         public int SelectedIndex { get; private set; } = 0;
+        private IOutput _output;
 
-        public MenuController()
+        public MenuController(IOutput output)
         {
+            _output = output;
             Current = new ContainerMenuItem("Магазин", new List<IMenuItem>()
             {
                 new ContainerMenuItem("Витрины/Полки", new List<IMenuItem>(){

@@ -16,5 +16,10 @@ namespace Client
             Write(text, color);
             Console.WriteLine();
         }
+
+        public static void Clear()
+        {
+            Console.Clear();
+        }
     }
 }

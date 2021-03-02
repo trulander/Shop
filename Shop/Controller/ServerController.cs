@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -12,114 +11,104 @@ namespace Shop.Controller
 {
     class ServerController
     {
-        private static ShopController _shop;
-        private static MenuController _menu;
-        public ServerController(ShopController shop, MenuController menu)
+        private static ProgramController _programController;
+        private  IOutput _output;
+        public const string urlServerHost = "Http://localhost:8080/";
+        
+        public ServerController(IOutput output)
         {
-            _shop = shop;
-            _menu = menu;
-            var th = new Thread(StartServer);
-            th.IsBackground = false;
-            th.Start();
+            _output = output;
+            _programController = new ProgramController(_output);
+            _output.waitHandle = new[]
+            {
+                new ManualResetEvent(initialState: true),
+                new ManualResetEvent(initialState: true)
+            };
+            
+            Thread serverThread = new Thread(() => StartServer(_output));
+            serverThread.IsBackground = false;
+            serverThread.Start();
         }
 
-        private static void StartServer()
+        private static void StartServer(IOutput output)
         {
+            Thread programLoopThread;
+            programLoopThread = new Thread(()=>ProgramLoop(output));
+            programLoopThread.IsBackground = true;
+            
             var httpListener = new HttpListener();
-            httpListener.Prefixes.Add("Http://localhost:8080/");
+            httpListener.Prefixes.Add(urlServerHost);
             httpListener.Start();
             
-            while (_shop.IsLoggedIn)
+            while (true)
             {
                 var requestContext = httpListener.GetContext();
                 var request = requestContext.Request;
-                var responseValue = "";
                 
                 if ( request.HttpMethod == "POST" )
                 {
-                    requestContext.Response.StatusCode = 200; //OK     
-                    responseValue = "accepted";
+                    string consoleText;
+                    int consoleKey;
                     
+                    requestContext.Response.StatusCode = 200; //OK     
                     var postData = GetNameValues(request);
-                    Console.WriteLine(postData["action"]);
-
-                    int actionPost;
-
-                    if (Int32.TryParse(postData["action"], out actionPost))
+                    
+                   
+                    if (postData.TryGetValue("text", out consoleText))
                     {
-                        switch(actionPost)
+                        output.ConsoleText = consoleText; 
+                    }
+                   
+                    if (Int32.TryParse(postData?["key"], out consoleKey))
+                    {
+                        output.ConsoleKey = consoleKey;
+                        
+                        output.waitHandle[1].Reset();
+                        output.waitHandle[0].Set();
+                        
+                        if (!programLoopThread.IsAlive)
                         {
-                            case (int)ConsoleKey.Enter:
-                                switch (_menu.Current.Children[_menu.SelectedIndex])
-                                {
-                                    case ActionMenuItem action:
-                                        _shop.RouteTo(action.Command);
-                                        break;
-                                    case IContainerMenuItem container:
-                                        _menu.Expand(container);
-                                        break;
-                                }
-                                break;
-                            case (int)ConsoleKey.UpArrow:
-                                _menu.Prev();
-                                break;
-                            case (int)ConsoleKey.DownArrow:
-                                _menu.Next();
-                                break;
-
-                            case (int)ConsoleKey.Backspace:
-                            case (int)ConsoleKey.LeftArrow:
-                            case (int)ConsoleKey.Escape:
-                                _menu.Return();
-                                break;
-                            case (int)ConsoleKey.RightArrow:
-                                if (_menu.Current.Children[_menu.SelectedIndex] is IContainerMenuItem containerItem)
-                                    _menu.Expand(containerItem);
-                                break;
-                            default:
-                                Output.WriteLine("Server: unsupported method");
-                                responseValue = "unsupported method";
-                                break;
+                            programLoopThread = new Thread(()=>ProgramLoop(output));
+                            programLoopThread.IsBackground = false;
+                            programLoopThread.Start();
                         }
-                        Console.Clear();
-                        
-                        responseValue += _menu.Current.GetFullPathText() + "\r\n";
-                        
-                        Output.WriteLine(_menu.Current.GetFullPathText(), ConsoleColor.Yellow);
-                        Console.WriteLine();
-
-                        for (int i = 0; i < _menu.Current.Children.Count; i++)
-                        {
-                            IMenuItem item = _menu.Current.Children[i];
-
-                            if (i != _menu.SelectedIndex)
-                            {
-                                responseValue += "  " + item.Text + "\r\n";
-                                Console.WriteLine("  " + item.Text);
-                            }
-                            else
-                            {
-                                responseValue += "\u00A7 " + item.Text + "\r\n";
-                                Output.WriteLine("\u00A7 " + item.Text, ConsoleColor.Cyan);
-                            }
-                        }                        
+                        output.waitHandle[1].WaitOne();
                     }
                 }
                 else
                 {
-                    requestContext.Response.StatusCode = 500; //OK
+                    requestContext.Response.StatusCode = 500; //exception
                 }
         
-                
+                Console.WriteLine(output.Buffer);
 
+                requestContext.Response.Headers.Add("lastMethodRequired",output.lastMethodRequired);
+                output.lastMethodRequired = "";
+                
                 var stream = requestContext.Response.OutputStream;
-                var bytes = Encoding.UTF8.GetBytes(responseValue);
-                stream.Write(bytes, 0, bytes.Length);
+                var bytes = Encoding.UTF8.GetBytes(output.Buffer);
+                try
+                {
+                    stream.Write(bytes, 0, bytes.Length);
+                }
+                catch
+                {
+                    Console.WriteLine("Client was disconnected");
+                }
+                
                 requestContext.Response.Close();
             }
-            
+            /*
+             * todo:   finish current thread, now the code will never use
+             */
             httpListener.Stop();
             httpListener.Close();
+        }
+
+        private static void ProgramLoop(IOutput output)
+        {
+            _programController.MainLoop();
+            output.waitHandle[1].Set();
         }
         
         static string DecodeUrl(string url)

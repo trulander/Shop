@@ -4,34 +4,34 @@ namespace Client
 {
     public class ProgramController
     {
+        private HttpController _httpController;
+        private Result _response;
         public ProgramController()
         {
             Console.WriteLine("Http client for ShowCase developed by code1code.");
+            _httpController = new HttpController();
+            _response = _httpController.Request(37);
             MainLoop();
         }
 
         private void MainLoop()
         {
-            
             do
             {
-                
-                //View.WriteLine(_menu.Current.GetFullPathText(), ConsoleColor.Yellow);
-                //Console.WriteLine();
-
-                /*for (int i = 0; i < _menu.Current.Children.Count; i++)
+                View.Clear();
+                View.WriteLine(_response.text);
+                switch (_response.action)
                 {
-                    IMenuItem item = _menu.Current.Children[i];
-
-                    if (i != _menu.SelectedIndex)
-                        Console.WriteLine("  " + item.Text);
-                    else
-                        Output.WriteLine("\u00A7 " + item.Text, ConsoleColor.Cyan);
-                }*/
-                int action = (int)Console.ReadKey(true).Key;
-                Console.Clear();
-                HttpController httpController = new HttpController(action);
-               
+                    case "ReadLine":
+                        _response = _httpController.Request(0,Console.ReadLine());
+                        break;
+                    case "ReadKey":
+                        _response = _httpController.Request((int)Console.ReadKey(true).Key);
+                        break;
+                    default:
+                        _response = _httpController.Request(37);
+                        break;
+                }
             }
             while (true);
         }
